@@ -1,0 +1,34 @@
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+
+const extension = path.join(__dirname, "..", "extension");
+
+function assertScriptIdsExist(pageName) {
+  const html = fs.readFileSync(path.join(extension, `${pageName}.html`), "utf8");
+  const script = fs.readFileSync(path.join(extension, `${pageName}.js`), "utf8");
+  const ids = [...script.matchAll(/\$\("([^"]+)"\)/g)].map((match) => match[1]);
+  for (const id of new Set(ids)) {
+    assert.match(html, new RegExp(`id=["']${id}["']`), `${pageName}.html must provide #${id}`);
+  }
+}
+
+assertScriptIdsExist("popup");
+assertScriptIdsExist("options");
+assertScriptIdsExist("blocked");
+
+const popup = fs.readFileSync(path.join(extension, "popup.html"), "utf8");
+assert.doesNotMatch(popup, />Current focus</i);
+assert.doesNotMatch(popup, />Current page</i);
+assert.doesNotMatch(popup, />Ready when you are</i);
+assert.match(popup, /<textarea[^>]+maxlength="8000"/);
+assert.match(popup, /By starting, you agree to send this focus/);
+
+const manifest = JSON.parse(fs.readFileSync(path.join(extension, "manifest.json"), "utf8"));
+const packageJSON = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "package.json"), "utf8"));
+assert.equal(manifest.version, packageJSON.version, "package and extension versions must stay aligned");
+for (const icon of Object.values(manifest.icons || {})) {
+  assert.equal(fs.existsSync(path.join(extension, icon)), true, `missing manifest icon ${icon}`);
+}
+
+console.log("UI contract tests passed");

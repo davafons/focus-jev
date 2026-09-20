@@ -1,0 +1,23 @@
+:root {
+  color-scheme: light dark; --bg: #f2f2f7; --text: #1d1d1f; --secondary: #6e6e73;
+  --separator: rgba(60,60,67,.18); --control: rgba(118,118,128,.12); --accent: #007aff;
+  font: 16px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  color: var(--text); background: var(--bg);
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #1c1c1e; --text: #f5f5f7; --secondary: #aeaeb2; --separator: rgba(84,84,88,.62); --control: rgba(118,118,128,.2); --accent: #0a84ff; }
+}
+* { box-sizing: border-box; }
+body { display: grid; min-height: 100vh; margin: 0; place-items: center; padding: 28px; background: radial-gradient(circle at 50% -20%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 48%), var(--bg); }
+main { width: min(620px, 100%); }
+.blocked-label { display: flex; align-items: center; gap: 9px; color: var(--secondary); font-size: 13px; font-weight: 650; }
+.blocked-label svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.65; stroke-linejoin: round; }
+h1 { margin: 18px 0 0; font-size: clamp(31px, 5vw, 48px); line-height: 1.08; letter-spacing: -.04em; overflow-wrap: anywhere; }
+section { margin-top: 32px; padding-top: 22px; border-top: 1px solid var(--separator); }
+section > span { color: var(--secondary); font-size: 12px; font-weight: 650; }
+#goal { margin: 8px 0 0; max-height: 190px; overflow: auto; white-space: pre-wrap; font-size: 17px; line-height: 1.55; }
+.meta { margin-top: 20px; }
+.meta span { display: inline-block; padding: 5px 9px; border-radius: 999px; color: var(--secondary); background: var(--control); font-size: 12px; font-weight: 650; }
+button { display: flex; min-height: 46px; align-items: center; gap: 8px; margin-top: 28px; border: 0; border-radius: 12px; padding: 0 17px; color: white; background: var(--accent); font: inherit; font-weight: 700; cursor: pointer; }
+button:hover { filter: brightness(1.08); }
+button:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 32%, transparent); outline-offset: 3px; }

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Focus Guard Settings</title>
+    <link rel="stylesheet" href="options.css">
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 3.2 19 6v5.2c0 4.4-2.8 7.8-7 9.6-4.2-1.8-7-5.2-7-9.6V6l7-2.8Z"/></svg>
+        </div>
+        <div><h1>Settings</h1><p id="version">Focus Guard</p></div>
+      </header>
+
+      <section>
+        <h2>JEV connection</h2>
+        <p class="intro">Use your Cloudflare account to evaluate pages with JEV.</p>
+
+        <label for="account-id">Cloudflare account ID</label>
+        <input id="account-id" autocomplete="off" spellcheck="false">
+
+        <label for="api-token">Cloudflare API token</label>
+        <input id="api-token" type="password" autocomplete="off" spellcheck="false">
+
+        <label for="gateway-id">AI Gateway ID</label>
+        <input id="gateway-id" value="jev-local" autocomplete="off" spellcheck="false">
+
+        <details>
+          <summary>Gateway authentication <span>Optional</span></summary>
+          <label for="gateway-token">Gateway token</label>
+          <input id="gateway-token" type="password" autocomplete="off" spellcheck="false">
+        </details>
+
+        <div class="actions">
+          <button id="save" class="primary" type="button">Save</button>
+          <button id="test" type="button">Test connection</button>
+        </div>
+        <p id="message" role="status"></p>
+      </section>
+
+      <section class="privacy">
+        <h2>Data and privacy</h2>
+        <p>Your focus statement and public page metadata are sent only to Cloudflare for each live decision. Credentials and session state stay in this browser profile.</p>
+        <p>Use a narrowly scoped token. Browser extension storage is profile-local, not a system keychain.</p>
+      </section>
+    </main>
+    <script src="options.js"></script>
+  </body>
+</html>

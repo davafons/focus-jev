@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Page blocked · Focus Guard</title>
+    <link rel="stylesheet" href="blocked.css">
+  </head>
+  <body>
+    <main>
+      <div class="blocked-label">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2 19 6v5.2c0 4.4-2.8 7.8-7 9.6-4.2-1.8-7-5.2-7-9.6V6l7-2.8Z"/></svg>
+        <span>Blocked</span>
+      </div>
+      <h1 id="page-title">This page</h1>
+      <section>
+        <span>Your focus</span>
+        <p id="goal"></p>
+      </section>
+      <div class="meta"><span id="confidence">Block confidence</span></div>
+      <button id="back" type="button"><span aria-hidden="true">←</span> Go back</button>
+    </main>
+    <script src="blocked.js"></script>
+  </body>
+</html>
