@@ -436,8 +436,11 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
   await chrome.tabs.sendMessage(tabId, { type: "focus-guard-check-now" }).catch(() => {});
   notifyDiagnosticsChanged();
 });
-chrome.tabs.onUpdated?.addListener((_tabId, changeInfo) => {
+chrome.tabs.onUpdated?.addListener((tabId, changeInfo) => {
   if (changeInfo.status || changeInfo.url || changeInfo.title) notifyDiagnosticsChanged();
+  if (changeInfo.status || changeInfo.url) {
+    chrome.tabs.sendMessage(tabId, { type: "focus-guard-check-now", force: true }).catch(() => {});
+  }
 });
 chrome.windows.onFocusChanged.addListener(async (windowId) => {
   if (windowId === chrome.windows.WINDOW_ID_NONE) return;

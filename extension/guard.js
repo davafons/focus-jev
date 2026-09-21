@@ -58,10 +58,21 @@
       try { inspectStructuredData(JSON.parse(script.textContent || "null")); } catch { /* invalid metadata */ }
     }
     add("Page heading", document.querySelector("main h1, article h1, h1")?.textContent);
+    add("Open Graph title", document.querySelector('meta[property="og:title"]')?.content);
     add("Open Graph description", document.querySelector('meta[property="og:description"]')?.content);
     add("Page description", document.querySelector('meta[name="description"]')?.content);
     add("Social description", document.querySelector('meta[name="twitter:description"]')?.content);
     add("Site", document.querySelector('meta[property="og:site_name"]')?.content);
+    add("Author or channel", document.querySelector(
+      '#owner #channel-name, ytd-channel-name, [itemprop="author"], [itemprop="creator"], meta[itemprop="author"]',
+    )?.content || document.querySelector(
+      '#owner #channel-name, ytd-channel-name, [itemprop="author"], [itemprop="creator"]',
+    )?.textContent);
+    add("Video description", document.querySelector(
+      '#description-inline-expander, ytd-text-inline-expander, [itemprop="description"]',
+    )?.textContent || document.querySelector('meta[itemprop="description"]')?.content);
+    const content = document.querySelector("main, article")?.innerText;
+    if (content) add("Visible page text", content.slice(0, 1_500));
     return details.join("\n").slice(0, 3_000);
   }
 
@@ -103,6 +114,10 @@
       observedPage = currentPage;
       titleAtNavigation = document.title;
       navigationStartedAt = Date.now();
+    }
+    if (force) {
+      navigationStartedAt = 0;
+      return false;
     }
     if (!navigationStartedAt) return false;
     const age = Date.now() - navigationStartedAt;
