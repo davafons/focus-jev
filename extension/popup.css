@@ -48,7 +48,7 @@ body {
   overflow: hidden;
   background: var(--bg);
 }
-main { padding: 20px var(--side-gutter) 52px; }
+main { padding: 20px var(--side-gutter) 18px; }
 header { display: flex; min-height: 28px; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
 .header-copy { min-width: 0; }
 .status-line { display: flex; align-items: center; gap: 8px; color: var(--secondary); font-size: 12px; font-weight: 600; }
@@ -100,9 +100,9 @@ button:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 34%, 
 }
 .badge.allow { color: var(--green); background: var(--green-bg); }
 .badge.block { color: var(--red); background: var(--red-bg); }
-footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; margin-top: 17px; padding-top: 12px; border-top: 1px solid var(--separator); }
+footer { display: grid; width: 100%; max-width: 100%; grid-template-columns: minmax(0, 1fr) 66px; gap: 4px; margin-top: 17px; padding-top: 12px; border-top: 1px solid var(--separator); }
 .activity-count { min-width: 0; min-height: 18px; overflow: hidden; color: var(--tertiary); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
-.footer-actions { display: flex; align-items: center; gap: 3px; }
+.footer-actions { display: flex; width: 66px; min-width: 66px; align-items: center; justify-content: flex-end; gap: 3px; overflow: hidden; }
 .footer-actions .icon-button { margin-left: 2px; }
 .icon-button { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 9px; color: var(--secondary); background: transparent; }
 .icon-button:hover { color: var(--text); background: var(--control); }
