@@ -64,6 +64,18 @@ async function clearSessionDecisions() {
   await chrome.storage.session.remove([CACHE_KEY, STATS_KEY, ...tabKeys]);
 }
 
+function clearCachedPage(cache, focus, tab) {
+  const url = Core.pageIdentity(tab?.url);
+  for (const key of Object.keys(cache)) {
+    try {
+      const cached = JSON.parse(key);
+      if (cached.session === focus.sessionId && cached.url === url) delete cache[key];
+    } catch {
+      delete cache[key];
+    }
+  }
+}
+
 function trimmedCache(cache) {
   return Object.fromEntries(
     Object.entries(cache)
@@ -505,7 +517,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (!tab?.id) return { ok: false };
         const [{ focus }, { cache }] = await Promise.all([localState(), sessionValues()]);
         if (focus.active) {
-          delete cache[Core.cacheKey(focus.sessionId, Core.focusStatement(focus.goal, focus.allowances), tab)];
+          clearCachedPage(cache, focus, tab);
           await chrome.storage.session.set({ [CACHE_KEY]: cache });
         }
         await chrome.storage.session.remove(tabDecisionKey(tab.id));

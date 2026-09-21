@@ -45,6 +45,7 @@
       goal: String(goal || "").trim().toLowerCase(),
       url: pageIdentity(page?.url),
       title: normalizeTitle(page?.title),
+      context: String(page?.description || "").replace(/\s+/g, " ").trim().toLowerCase().slice(0, 3_000),
     });
   }
 

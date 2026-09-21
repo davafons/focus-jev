@@ -16,6 +16,11 @@ assert.notEqual(
   Core.cacheKey("session", "AI news", { url: "https://example.com", title: "Outer Wilds" }),
   "a stale SPA title must not share a decision cache entry",
 );
+assert.notEqual(
+  Core.cacheKey("session", "AI news", { url: "https://example.com", title: "Video", description: "A coding tutorial" }),
+  Core.cacheKey("session", "AI news", { url: "https://example.com", title: "Video", description: "A music playlist" }),
+  "a changed page context must receive a fresh decision",
+);
 
 const blocked = Core.decisionFromAnswers({
   should_block: { type: "noul", noul: 0.96 },

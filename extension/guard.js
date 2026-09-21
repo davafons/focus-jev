@@ -6,6 +6,8 @@
   const ERROR_RETRY_MS = 10_000;
   const MAX_CONTEXT_CHARS = 3_000;
   const MAX_CONTEXT_FIELD_CHARS = 900;
+  const CONTEXT_SETTLE_MS = 700;
+  const MAX_INITIAL_CONTEXT_WAIT_MS = 2_500;
   let checking = false;
   let blocked = false;
   let pendingForce = false;
@@ -13,11 +15,13 @@
   let titleAtNavigation = document.title;
   let navigationStartedAt = 0;
   let settleTimer = null;
-  let mutationTimer = null;
   let lastBaseSignature = "";
   let lastFullSignature = "";
   let lastDecision = null;
   let lastCheckedAt = 0;
+  let initialContextReady = false;
+  let initialContextStartedAt = Date.now();
+  let initialContextTimer = null;
 
   function pageIdentity(url) {
     try {
@@ -32,11 +36,18 @@
   function pageDescription() {
     const details = [];
     const seen = new Set();
+    const mediaCues = new Set();
     const add = (label, value) => {
       const text = String(value || "").replace(/\s+/g, " ").trim();
       if (!text || seen.has(text.toLowerCase())) return;
       seen.add(text.toLowerCase());
       details.push(`${label}: ${text.slice(0, MAX_CONTEXT_FIELD_CHARS)}`);
+      if (/\b(bgm|ost|soundtrack|music|audio|playlist|mix|ambient|lofi|asmr|karaoke|dj|radio)\b/iu.test(text)) {
+        mediaCues.add("audio or music terminology");
+      }
+      if (/\b\d+\s*(?:min(?:ute)?s?|hours?|hrs?)\b|\d+\s*(?:分|時間)\s*(?:耐久|long)/u.test(text)) {
+        mediaCues.add("long-duration media");
+      }
     };
     const addPerson = (label, value) => {
       const people = Array.isArray(value) ? value : [value];
@@ -49,9 +60,12 @@
       for (const item of items) {
         if (!item || typeof item !== "object") continue;
         if (Array.isArray(item["@graph"])) inspectStructuredData(item["@graph"]);
+        add("Content type", Array.isArray(item["@type"]) ? item["@type"].join(", ") : item["@type"]);
         add("Content name", item.name || item.headline);
         add("Content description", item.description);
         add("Genre", Array.isArray(item.genre) ? item.genre.join(", ") : item.genre);
+        add("Duration", item.duration);
+        add("Language", item.inLanguage);
         add("Section", item.articleSection);
         add("Keywords", Array.isArray(item.keywords) ? item.keywords.join(", ") : item.keywords);
         addPerson("Author", item.author);
@@ -77,6 +91,8 @@
     )?.textContent);
     add("Content summary", document.querySelector('meta[itemprop="description"]')?.content
       || document.querySelector('[itemprop="description"]')?.textContent);
+    add("Duration", document.querySelector('meta[itemprop="duration"], meta[property="og:video:duration"]')?.content);
+    if (mediaCues.size) add("Media cues", [...mediaCues].join(", "));
     const content = document.querySelector('main, article, [role="main"], [itemprop="articleBody"]')?.innerText
       || document.body?.innerText;
     if (content) add("Visible page text", content.slice(0, 1_500));
@@ -91,6 +107,28 @@
     } catch {
       return "";
     }
+  }
+
+  function scheduleInitialContextCheck() {
+    if (initialContextReady || lastDecision || checking) return;
+    clearTimeout(initialContextTimer);
+    const elapsed = Date.now() - initialContextStartedAt;
+    const delay = Math.min(CONTEXT_SETTLE_MS, Math.max(0, MAX_INITIAL_CONTEXT_WAIT_MS - elapsed));
+    initialContextTimer = setTimeout(() => {
+      initialContextReady = true;
+      check();
+    }, delay);
+  }
+
+  function waitForInitialContext() {
+    if (initialContextReady || lastDecision) return false;
+    // Content-script tests and browser-restricted documents may not expose a body.
+    if (!document.body) {
+      initialContextReady = true;
+      return false;
+    }
+    scheduleInitialContextCheck();
+    return true;
   }
 
   function stopPageMedia() {
@@ -152,6 +190,7 @@
       return;
     }
     if (!document.title && document.readyState === "loading") return;
+    if (waitForInitialContext()) return;
     if (waitForSettledNavigation(force)) return;
     const requestedURL = location.href;
     const baseSignature = `${pageIdentity(requestedURL)}\n${document.title}`;
@@ -214,9 +253,8 @@
   document.addEventListener("yt-page-data-updated", () => check());
   if (typeof MutationObserver !== "undefined") {
     new MutationObserver(() => {
-      clearTimeout(mutationTimer);
-      mutationTimer = setTimeout(check, 180);
-    }).observe(document.querySelector("title") || document.documentElement, {
+      if (!initialContextReady && !lastDecision) scheduleInitialContextCheck();
+    }).observe(document.querySelector('main, article, [role="main"], [itemprop="articleBody"]') || document.body || document.documentElement, {
       childList: true,
       subtree: true,
       characterData: true,
