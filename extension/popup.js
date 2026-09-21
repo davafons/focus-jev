@@ -32,7 +32,7 @@ function elapsedLabel(startedAt) {
 
 function render(value) {
   diagnostics = value;
-  const { focus, configured, tab, decision, stats, cacheEntries } = value;
+  const { focus, configured, tab, decision } = value;
   $("start-view").classList.toggle("hidden", focus.active);
   $("active-view").classList.toggle("hidden", !focus.active);
   $("setup-note").classList.toggle("hidden", configured);
@@ -73,16 +73,8 @@ function render(value) {
     $("confidence").textContent = Number.isFinite(score) && decision.source !== "error"
       ? `${Math.round(score * 100)}% ${decision.action === "block" ? "block" : "allow"} confidence`
       : "No confidence score";
-    $("source").textContent = decision.cacheHit || String(decision.source).endsWith("-cache")
-      ? "Cached"
-      : (decision.source === "gateway" ? "Gateway" : (decision.source === "error" ? "Unavailable" : "Live"));
     requestedCheckFor = "";
   }
-  const liveChecks = Number(stats?.jevCalls || 0);
-  const cachedChecks = Number(stats?.cacheHits || cacheEntries || 0);
-  $("activity-count").textContent = focus.active
-    ? `${liveChecks} live · ${cachedChecks} cached`
-    : "";
   $("recheck").classList.toggle("hidden", !focus.active || !decision);
 }
 
