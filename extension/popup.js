@@ -37,18 +37,26 @@ function render(value) {
   $("setup-note").classList.toggle("hidden", configured);
   $("start").disabled = !configured;
   $("elapsed-label").textContent = focus.active ? elapsedLabel(focus.startedAt) : "";
+  $("session-header").classList.toggle("hidden", !focus.active);
   $("status-line").classList.toggle("hidden", !focus.active);
-  $("ready-caption").classList.toggle("hidden", focus.active);
   $("stop").classList.toggle("hidden", !focus.active);
   if (!focus.active && !draftInitialized) {
     $("goal").value = focus.goal || "";
     $("allow-music").checked = Boolean(focus.allowances?.music);
+    $("allow-sns").checked = Boolean(focus.allowances?.sns);
+    $("allow-youtube").checked = Boolean(focus.allowances?.youtube);
     draftInitialized = true;
   }
   $("active-goal").textContent = focus.goal || "";
-  $("active-allowances").textContent = focus.allowances?.music ? "Music allowed" : "";
+  $("active-allowances").textContent = [
+    focus.allowances?.music && "Music allowed",
+    focus.allowances?.sns && "SNS allowed",
+    focus.allowances?.youtube && "YouTube allowed",
+  ].filter(Boolean).join(" · ");
 
   $("page-title").textContent = tab?.title || "No page selected";
+  $("page-url").textContent = tab?.url || "";
+  $("page-icon").src = tab?.favIconUrl || "icons/icon-32.png";
   const badge = $("decision-badge");
   const action = decision?.action || "neutral";
   badge.className = `badge ${action}`;
@@ -116,7 +124,11 @@ $("start").addEventListener("click", async () => {
   const response = await send({
     type: "focus-guard-start",
     goal: $("goal").value,
-    allowances: { music: $("allow-music").checked },
+    allowances: {
+      music: $("allow-music").checked,
+      sns: $("allow-sns").checked,
+      youtube: $("allow-youtube").checked,
+    },
   });
   if (!response.ok) {
     await refresh();
@@ -148,3 +160,6 @@ chrome.tabs.onUpdated.addListener((_tabId, changeInfo) => {
   if (changeInfo.status || changeInfo.url || changeInfo.title) refresh();
 });
 chrome.storage.onChanged.addListener(refresh);
+chrome.runtime.onMessage.addListener((message) => {
+  if (message?.type === "focus-guard-diagnostics-changed") refresh();
+});

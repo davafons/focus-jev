@@ -64,6 +64,8 @@ assert.equal(Core.blockThresholdForPage({ url: "https://x.com/home" }), 0.5);
 assert.equal(Core.blockThresholdForPage({ url: "https://x.com/example/status/123" }), 0.65);
 assert.equal(Core.focusStatement("Write a report", { music: false }), "Write a report");
 assert.match(Core.focusStatement("Write a report", { music: true }), /Music and music-video destinations/);
+assert.match(Core.focusStatement("Write a report", { sns: true, youtube: true }), /Social-network destinations/);
+assert.match(Core.focusStatement("Write a report", { sns: true, youtube: true }), /YouTube destinations/);
 
 const request = Core.jevRequest("Learn more about JEV AI", {
   url: "https://www.youtube.com/watch?v=IHH4EQVenfo",

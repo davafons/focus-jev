@@ -21,9 +21,13 @@ const popup = fs.readFileSync(path.join(extension, "popup.html"), "utf8");
 assert.doesNotMatch(popup, />Current focus</i);
 assert.doesNotMatch(popup, />Current page</i);
 assert.doesNotMatch(popup, /<h1[^>]*>Focus Guard/i);
-assert.match(popup, /<textarea[^>]+maxlength="8000"/);
+assert.match(popup, /<textarea[^>]+rows="5"[^>]+maxlength="8000"/);
 assert.match(popup, /id="allow-music"/);
-assert.match(popup, /By starting, you agree to send this focus/);
+assert.match(popup, /id="allow-sns"/);
+assert.match(popup, /id="allow-youtube"/);
+assert.match(popup, /privacy\.html/);
+assert.match(popup, /limited page metadata are sent to your selected provider/);
+assert.match(popup, /without storing URLs, titles, page metadata, or decisions/);
 assert.match(popup, /selected provider/);
 
 const manifest = JSON.parse(fs.readFileSync(path.join(extension, "manifest.json"), "utf8"));
@@ -32,5 +36,6 @@ assert.equal(manifest.version, packageJSON.version, "package and extension versi
 for (const icon of Object.values(manifest.icons || {})) {
   assert.equal(fs.existsSync(path.join(extension, icon)), true, `missing manifest icon ${icon}`);
 }
+assert.equal(fs.existsSync(path.join(extension, "privacy.html")), true, "missing extension privacy page");
 
 console.log("UI contract tests passed");

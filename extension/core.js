@@ -49,14 +49,22 @@
   }
 
   function normalizeAllowances(value) {
-    return { music: Boolean(value?.music) };
+    return {
+      music: Boolean(value?.music),
+      sns: Boolean(value?.sns),
+      youtube: Boolean(value?.youtube),
+    };
   }
 
   function focusStatement(goal, allowances) {
     const base = String(goal || "").trim().slice(0, 7_200);
     const allowed = normalizeAllowances(allowances);
-    if (!allowed.music) return base;
-    return `${base}\n\nExplicit allowance: Music and music-video destinations used for listening are permitted during this focus session. This does not permit unrelated browsing, feeds, or entertainment.`;
+    const permitted = [];
+    if (allowed.music) permitted.push("Music and music-video destinations used for listening.");
+    if (allowed.sns) permitted.push("Social-network destinations, including feeds, profiles, and messages.");
+    if (allowed.youtube) permitted.push("YouTube destinations, including videos, search, and the home feed.");
+    if (!permitted.length) return base;
+    return `${base}\n\nExplicit allowances for this focus session:\n- ${permitted.join("\n- ")}`;
   }
 
   function providerMode(settings) {

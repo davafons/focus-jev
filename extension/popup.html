@@ -8,42 +8,35 @@
   </head>
   <body>
     <main>
-      <header>
-        <div class="mark" aria-label="Focus">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 3.2 19 6v5.2c0 4.4-2.8 7.8-7 9.6-4.2-1.8-7-5.2-7-9.6V6l7-2.8Z"/>
-          </svg>
-        </div>
+      <header id="session-header" class="hidden">
         <div class="header-copy">
-          <p id="ready-caption" class="ready-caption">Ready when you are</p>
           <div id="status-line" class="status-line hidden"><span class="live-dot"></span><span id="elapsed-label"></span></div>
         </div>
         <button id="stop" class="text-button hidden" type="button">End</button>
-        <button id="settings" class="icon-button" type="button" aria-label="Open settings" title="Settings">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm8 3.5-.1-1.2 2-1.5-2-3.4-2.4 1a8.7 8.7 0 0 0-2-1.2L15.2 3h-4L10.8 5.7c-.7.3-1.4.7-2 1.2l-2.4-1-2 3.4 2 1.5A8 8 0 0 0 6.3 12l.1 1.2-2 1.5 2 3.4 2.4-1c.6.5 1.3.9 2 1.2l.4 2.7h4l.4-2.7c.7-.3 1.4-.7 2-1.2l2.4 1 2-3.4-2-1.5.1-1.2Z"/>
-          </svg>
-        </button>
       </header>
 
       <section id="start-view">
         <label class="prompt" for="goal">What are you focusing on?</label>
-        <textarea id="goal" rows="8" maxlength="8000" placeholder="For example: Learn how JEV makes decisions. Documentation, technical articles, and relevant videos are useful. Avoid unrelated feeds and entertainment."></textarea>
+        <textarea id="goal" rows="5" maxlength="8000" placeholder="For example: Learn how JEV makes decisions. Documentation, technical articles, and relevant videos are useful. Avoid unrelated feeds and entertainment."></textarea>
         <fieldset class="allowances">
-          <legend>Allowed while focusing</legend>
           <label class="allowance-toggle" for="allow-music">
             <input id="allow-music" type="checkbox">
-            <span>
-              <strong>Allow music</strong>
-              <small>Music and music videos stay available without adding it to your goal.</small>
-            </span>
+            <span>Allow music</span>
+          </label>
+          <label class="allowance-toggle" for="allow-sns">
+            <input id="allow-sns" type="checkbox">
+            <span>Allow SNS</span>
+          </label>
+          <label class="allowance-toggle" for="allow-youtube">
+            <input id="allow-youtube" type="checkbox">
+            <span>Allow YouTube</span>
           </label>
         </fieldset>
         <p id="setup-note" class="note hidden">Connect JEV in Settings before starting.</p>
-        <p class="disclosure">By starting, you agree to send this focus and each active page’s URL, title, and public metadata to your selected provider for a decision. Hosted mode sends it through the Focus Guard gateway.</p>
         <button id="start" class="primary" type="button">
           <span>Start focus</span><span aria-hidden="true">→</span>
         </button>
+        <p class="disclosure">Your focus and limited page metadata are sent to your selected provider for a decision. Hosted mode relays them through Focus Guard without storing URLs, titles, page metadata, or decisions. <a href="privacy.html" target="_blank">Privacy policy</a></p>
       </section>
 
       <section id="active-view" class="hidden">
@@ -53,7 +46,13 @@
 
       <section id="page-section" class="page-section">
         <div class="page-row">
-          <strong id="page-title" class="page-title">No page selected</strong>
+          <div class="page-identity">
+            <img id="page-icon" class="page-icon" src="icons/icon-32.png" alt="">
+            <div class="page-copy">
+              <strong id="page-title" class="page-title">No page selected</strong>
+              <span id="page-url" class="page-url"></span>
+            </div>
+          </div>
           <span id="decision-badge" class="badge neutral">Checking</span>
         </div>
         <p id="decision-reason" class="decision-reason"></p>
@@ -68,6 +67,11 @@
         <span id="usage-count" class="activity-count"></span>
         <div class="footer-actions">
           <button id="recheck" class="quiet-button hidden" type="button">Check again</button>
+          <button id="settings" class="icon-button" type="button" aria-label="Open settings" title="Settings">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0-7Zm8 3.5-.1-1.2 2-1.5-2-3.4-2.4 1a8.7 8.7 0 0 0-2-1.2L15.2 3h-4L10.8 5.7c-.7.3-1.4.7-2 1.2l-2.4-1-2 3.4 2 1.5A8 8 0 0 0 6.3 12l.1 1.2-2 1.5 2 3.4 2.4-1c.6.5 1.3.9 2 1.2l.4 2.7h4l.4-2.7c.7-.3 1.4-.7 2-1.2l2.4 1 2-3.4-2-1.5.1-1.2Z"/>
+            </svg>
+          </button>
         </div>
       </footer>
       <p id="message" class="message" role="status"></p>

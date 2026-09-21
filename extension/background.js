@@ -11,6 +11,11 @@ const TAB_PREFIX = "focusJevTabDecision:";
 const MAX_CACHE_ENTRIES = 500;
 const inFlight = new Map();
 
+function notifyDiagnosticsChanged() {
+  if (typeof chrome.runtime.sendMessage !== "function") return;
+  Promise.resolve(chrome.runtime.sendMessage({ type: "focus-guard-diagnostics-changed" })).catch(() => {});
+}
+
 function tabDecisionKey(tabId) {
   return `${TAB_PREFIX}${tabId}`;
 }
@@ -18,7 +23,12 @@ function tabDecisionKey(tabId) {
 async function localState() {
   const stored = await chrome.storage.local.get([STATE_KEY, SETTINGS_KEY]);
   return {
-    focus: stored[STATE_KEY] || { active: false, goal: "", allowances: { music: false }, sessionId: "" },
+    focus: stored[STATE_KEY] || {
+      active: false,
+      goal: "",
+      allowances: { music: false, sns: false, youtube: false },
+      sessionId: "",
+    },
     settings: stored[SETTINGS_KEY] || {},
   };
 }
@@ -320,6 +330,7 @@ async function decideForPage(message, sender) {
   if (typeof sender.tab?.id === "number") {
     await chrome.storage.session.set({ [tabDecisionKey(sender.tab.id)]: stored });
   }
+  notifyDiagnosticsChanged();
   return stored;
 }
 
@@ -348,7 +359,12 @@ async function diagnostics() {
     focus,
     configured: Core.settingsComplete(settings),
     provider: Core.providerMode(settings),
-    tab: tab ? { id: tab.id, url: tab.url || "", title: tab.title || "" } : null,
+    tab: tab ? {
+      id: tab.id,
+      url: tab.url || "",
+      title: tab.title || "",
+      favIconUrl: tab.favIconUrl || "",
+    } : null,
     decision,
     stats: session.stats,
     cacheEntries: Object.values(session.cache).filter((entry) => Core.cacheEntryValid(entry)).length,
@@ -387,6 +403,7 @@ async function startFocus(goal, allowances) {
   await chrome.storage.local.set({ [STATE_KEY]: focus });
   await clearSessionDecisions();
   await notifyTabs("focus-guard-check-now", { force: true });
+  notifyDiagnosticsChanged();
   return focus;
 }
 
@@ -396,6 +413,7 @@ async function stopFocus() {
   await chrome.storage.local.set({ [STATE_KEY]: stopped });
   await clearSessionDecisions();
   await notifyTabs("focus-guard-hide");
+  notifyDiagnosticsChanged();
   return stopped;
 }
 
@@ -407,11 +425,16 @@ chrome.runtime.onInstalled.addListener(async () => {
 });
 chrome.tabs.onActivated.addListener(async ({ tabId }) => {
   await chrome.tabs.sendMessage(tabId, { type: "focus-guard-check-now" }).catch(() => {});
+  notifyDiagnosticsChanged();
+});
+chrome.tabs.onUpdated?.addListener((_tabId, changeInfo) => {
+  if (changeInfo.status || changeInfo.url || changeInfo.title) notifyDiagnosticsChanged();
 });
 chrome.windows.onFocusChanged.addListener(async (windowId) => {
   if (windowId === chrome.windows.WINDOW_ID_NONE) return;
   const tabs = await chrome.tabs.query({ active: true, windowId });
   if (tabs[0]?.id) chrome.tabs.sendMessage(tabs[0].id, { type: "focus-guard-check-now" }).catch(() => {});
+  notifyDiagnosticsChanged();
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
