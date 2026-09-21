@@ -14,6 +14,7 @@ function loadDetails() {
     sessionId = focus.sessionId || "";
     $("goal").textContent = focus.goal || "Current focus session";
     $("page-title").textContent = decision.title || "This page";
+    $("page-icon").src = decision.favIconUrl || "icons/icon-32.png";
     $("confidence").textContent = `${Math.round((Number(decision.confidence) || 0) * 100)}% block confidence`;
   });
 }

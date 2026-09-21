@@ -328,6 +328,7 @@ async function decideForPage(message, sender) {
     ...decision,
     url: page.url,
     title: page.title,
+    favIconUrl: String(sender.tab?.favIconUrl || ""),
     goal: focus.goal,
     sessionId: focus.sessionId,
     evaluatedAt: Date.now(),
