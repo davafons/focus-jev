@@ -311,6 +311,7 @@ async function decideForPage(message, sender) {
   const page = {
     url: String(message.page?.url || sender.tab?.url || ""),
     title: String(message.page?.title || sender.tab?.title || ""),
+    favIconUrl: String(message.page?.favIconUrl || sender.tab?.favIconUrl || ""),
     description: String(message.page?.description || ""),
   };
   const decision = Core.isGatewayPage(page.url)
@@ -328,7 +329,7 @@ async function decideForPage(message, sender) {
     ...decision,
     url: page.url,
     title: page.title,
-    favIconUrl: String(sender.tab?.favIconUrl || ""),
+    favIconUrl: page.favIconUrl,
     goal: focus.goal,
     sessionId: focus.sessionId,
     evaluatedAt: Date.now(),

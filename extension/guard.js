@@ -65,6 +65,16 @@
     return details.join("\n").slice(0, 3_000);
   }
 
+  function pageIconUrl() {
+    const icon = document.querySelector('link[rel~="icon" i], link[rel="shortcut icon" i]')?.href;
+    if (icon) return icon;
+    try {
+      return new URL("/favicon.ico", location.href).href;
+    } catch {
+      return "";
+    }
+  }
+
   function stopPageMedia() {
     for (const media of document.querySelectorAll("audio, video")) {
       try {
@@ -135,6 +145,7 @@
         page: {
           url: requestedURL,
           title: document.title,
+          favIconUrl: pageIconUrl(),
           description,
         },
       },
