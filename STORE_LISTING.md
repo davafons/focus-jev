@@ -15,6 +15,8 @@ Focus JEV compares the active page's public metadata with a user-written focus s
 ## Permission justifications
 
 - `storage`: stores JEV connection settings and the active focus locally, and keeps decision caches for the browser session.
+- `tabs`: identifies the active tab and displays its title, URL, and favicon alongside the current JEV decision.
+- `scripting`: starts the page evaluator in an already-open eligible tab, so a focus session can check the current page without requiring a manual reload.
 - `http://*/*` and `https://*/*`: runs the page guard and reads the active page URL, title, and limited public metadata on pages the user visits. The extension needs broad coverage because focus enforcement applies across browsing destinations. HTTPS access sends the focus statement and active-page metadata to the provider selected by the user for a JEV decision; hosted mode sends it first to the Focus JEV gateway.
 
 ## Remote code
