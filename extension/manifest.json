@@ -3,7 +3,7 @@
   "name": "Focus Guard",
   "version": "1.4.1",
   "description": "Stay on task by asking JEV whether each page supports your current focus.",
-  "permissions": ["storage", "tabs"],
+  "permissions": ["storage", "tabs", "scripting"],
   "host_permissions": [
     "http://*/*",
     "https://*/*"

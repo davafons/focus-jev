@@ -120,7 +120,7 @@ async function refresh() {
     && requestedCheckFor !== pendingKey
   ) {
     requestedCheckFor = pendingKey;
-    chrome.tabs.sendMessage(response.diagnostics.tab.id, { type: "focus-guard-check-now" }).catch(() => {});
+    send({ type: "focus-guard-check-now", tabId: response.diagnostics.tab.id });
   }
 }
 

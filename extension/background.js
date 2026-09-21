@@ -395,8 +395,27 @@ async function blockedDetails(sender) {
 async function notifyTabs(type, extra = {}) {
   const tabs = await chrome.tabs.query({});
   await Promise.allSettled(tabs.map((tab) => (
-    typeof tab.id === "number" ? chrome.tabs.sendMessage(tab.id, { type, ...extra }) : null
+    typeof tab.id === "number"
+      ? (type === "focus-guard-check-now"
+        ? checkTabNow(tab.id, Boolean(extra.force))
+        : chrome.tabs.sendMessage(tab.id, { type, ...extra }))
+      : null
   )));
+}
+
+async function checkTabNow(tabId, force = false) {
+  if (typeof chrome.scripting?.executeScript === "function") {
+    await chrome.scripting.executeScript({ target: { tabId }, files: ["guard.js"] }).catch(() => {});
+  }
+  await chrome.tabs.sendMessage(tabId, { type: "focus-guard-check-now", force }).catch(() => {});
+}
+
+async function activeTab(tabId) {
+  if (typeof tabId === "number" && typeof chrome.tabs.get === "function") {
+    return chrome.tabs.get(tabId).catch(() => null);
+  }
+  const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+  return tab || null;
 }
 
 async function startFocus(goal, allowances) {
@@ -435,19 +454,19 @@ chrome.runtime.onInstalled.addListener(async () => {
   if (!Core.settingsComplete(settings)) await chrome.runtime.openOptionsPage();
 });
 chrome.tabs.onActivated.addListener(async ({ tabId }) => {
-  await chrome.tabs.sendMessage(tabId, { type: "focus-guard-check-now" }).catch(() => {});
+  await checkTabNow(tabId);
   notifyDiagnosticsChanged();
 });
 chrome.tabs.onUpdated?.addListener((tabId, changeInfo) => {
   if (changeInfo.status || changeInfo.url || changeInfo.title) notifyDiagnosticsChanged();
   if (changeInfo.status || changeInfo.url) {
-    chrome.tabs.sendMessage(tabId, { type: "focus-guard-check-now", force: true }).catch(() => {});
+    checkTabNow(tabId, true);
   }
 });
 chrome.windows.onFocusChanged.addListener(async (windowId) => {
   if (windowId === chrome.windows.WINDOW_ID_NONE) return;
   const tabs = await chrome.tabs.query({ active: true, windowId });
-  if (tabs[0]?.id) chrome.tabs.sendMessage(tabs[0].id, { type: "focus-guard-check-now" }).catch(() => {});
+  if (tabs[0]?.id) checkTabNow(tabs[0].id);
   notifyDiagnosticsChanged();
 });
 
@@ -470,7 +489,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       task = stopFocus().then((focus) => ({ ok: true, focus }));
       break;
     case "focus-guard-check-now":
-      task = chrome.tabs.query({ active: true, currentWindow: true }).then(async ([tab]) => {
+      task = activeTab(message.tabId).then(async (tab) => {
         if (!tab?.id) return { ok: false };
         const [{ focus }, { cache }] = await Promise.all([localState(), sessionValues()]);
         if (focus.active) {
@@ -478,7 +497,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           await chrome.storage.session.set({ [CACHE_KEY]: cache });
         }
         await chrome.storage.session.remove(tabDecisionKey(tab.id));
-        await chrome.tabs.sendMessage(tab.id, { type: "focus-guard-check-now", force: true });
+        await checkTabNow(tab.id, true);
         return { ok: true };
       });
       break;

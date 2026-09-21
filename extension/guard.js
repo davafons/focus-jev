@@ -1,4 +1,7 @@
 (() => {
+  if (globalThis.__focusGuardLoaded) return;
+  globalThis.__focusGuardLoaded = true;
+
   const ALLOW_RECHECK_MS = 60_000;
   const ERROR_RETRY_MS = 10_000;
   const MAX_CONTEXT_CHARS = 3_000;
