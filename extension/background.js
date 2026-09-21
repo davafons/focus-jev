@@ -36,7 +36,7 @@ async function localState() {
     focus: stored[STATE_KEY] || {
       active: false,
       goal: "",
-      allowances: { music: false, sns: false },
+      allowances: { music: false },
       sessionId: "",
     },
     settings: stored[SETTINGS_KEY] || {},
@@ -313,6 +313,24 @@ async function evaluatePage(focus, settings, page) {
   return work;
 }
 
+function contextSignals(description) {
+  const match = /^Media cues:\s*(.+)$/mu.exec(String(description || ""));
+  return match ? match[1].split(",").map((value) => value.trim()).filter(Boolean) : [];
+}
+
+function explainDecision(decision, focus, page) {
+  const signals = contextSignals(page.description);
+  const musicRelated = signals.includes("audio or music terminology");
+  if (!musicRelated) return { ...decision, contextSignals: signals };
+  if (decision.action === "allow" && focus.allowances?.music) {
+    return { ...decision, contextSignals: signals, reason: "Music/audio signals detected; allowed by your music allowance." };
+  }
+  if (decision.action === "block") {
+    return { ...decision, contextSignals: signals, reason: "Music/audio signals detected, but JEV found this page outside your focus." };
+  }
+  return { ...decision, contextSignals: signals, reason: `${decision.reason} Music/audio signals were detected.` };
+}
+
 async function decideForPage(message, sender) {
   const { focus, settings } = await localState();
   if (!focus.active) {
@@ -331,7 +349,7 @@ async function decideForPage(message, sender) {
     favIconUrl: String(message.page?.favIconUrl || sender.tab?.favIconUrl || ""),
     description: String(message.page?.description || ""),
   };
-  const decision = Core.isGatewayPage(page.url)
+  const rawDecision = Core.isGatewayPage(page.url)
     ? {
       action: "allow",
       confidence: 1,
@@ -342,6 +360,7 @@ async function decideForPage(message, sender) {
       cacheHit: false,
     }
     : await evaluatePage(focus, settings, page);
+  const decision = explainDecision(rawDecision, focus, page);
   const stored = {
     ...decision,
     url: page.url,

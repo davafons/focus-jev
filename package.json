@@ -1,6 +1,6 @@
 {
   "name": "focus-jev",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "private": true,
   "description": "A focused Chromium extension that uses JEV to keep browsing aligned with one session goal.",
   "scripts": {

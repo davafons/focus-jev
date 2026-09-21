@@ -44,13 +44,11 @@ function render(value) {
   if (!focus.active && !draftInitialized) {
     $("goal").value = focus.goal || "";
     $("allow-music").checked = Boolean(focus.allowances?.music);
-    $("allow-sns").checked = Boolean(focus.allowances?.sns);
     draftInitialized = true;
   }
   $("active-goal").textContent = focus.goal || "";
   $("active-allowances").textContent = [
     focus.allowances?.music && "Music allowed",
-    focus.allowances?.sns && "SNS allowed",
   ].filter(Boolean).join(" · ");
 
   $("page-title").textContent = tab?.title || "No page selected";
@@ -65,7 +63,7 @@ function render(value) {
     ? (decision.action === "block" ? "Blocked" : "Allowed")
     : (internalPage ? "Focus Guard" : (focus.active ? "Checking" : "Not checked"));
   $("decision-reason").textContent = decision?.reason
-    || (internalPage ? "Focus Guard pages are not evaluated." : (focus.active ? "Evaluating this page…" : "Start a focus session to evaluate pages."));
+    || (internalPage ? "Focus JEV pages are not evaluated." : (focus.active ? "Collecting page context…" : "Start a focus session to evaluate pages."));
   $("decision-meta").classList.toggle("hidden", !decision);
   if (decision) {
     const score = Number(decision.confidence);
@@ -128,7 +126,6 @@ $("start").addEventListener("click", async () => {
     goal: $("goal").value,
     allowances: {
       music: $("allow-music").checked,
-      sns: $("allow-sns").checked,
     },
   });
   if (!response.ok) {

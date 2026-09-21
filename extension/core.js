@@ -52,7 +52,6 @@
   function normalizeAllowances(value) {
     return {
       music: Boolean(value?.music),
-      sns: Boolean(value?.sns),
     };
   }
 
@@ -61,7 +60,6 @@
     const allowed = normalizeAllowances(allowances);
     const permitted = [];
     if (allowed.music) permitted.push("Music and music-video destinations used for listening.");
-    if (allowed.sns) permitted.push("Social-network destinations, including feeds, profiles, and messages.");
     if (!permitted.length) return base;
     return `${base}\n\nExplicit allowances for this focus session:\n- ${permitted.join("\n- ")}`;
   }
