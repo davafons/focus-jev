@@ -6,6 +6,8 @@
   const ALLOW_CACHE_MS = 60_000;
   const DECISION_POLICY_VERSION = 3;
   const MODEL = "typesafe/jev";
+  const TYPESAFE_SYSTEMONE_URL = "https://api.typesafe.ai/v1/systemone";
+  const HOSTED_API_URL = "https://api.focus-jev.lostcoords.com";
 
   function normalizeTitle(title) {
     return String(title || "")
@@ -46,11 +48,30 @@
     });
   }
 
+  function providerMode(settings) {
+    const explicit = String(settings?.provider || "").trim().toLowerCase();
+    if (["cloudflare", "typesafe", "compatible", "hosted"].includes(explicit)) return explicit;
+    return String(settings?.accountId || "").trim() || String(settings?.apiToken || "").trim()
+      ? "cloudflare"
+      : "hosted";
+  }
+
+  function validHttpsUrl(value) {
+    try {
+      return new URL(String(value || "")).protocol === "https:";
+    } catch {
+      return false;
+    }
+  }
+
   function settingsComplete(settings) {
-    return Boolean(
-      String(settings?.accountId || "").trim()
-      && String(settings?.apiToken || "").trim()
-    );
+    const provider = providerMode(settings);
+    if (provider === "hosted") return validHttpsUrl(settings?.hostedUrl || HOSTED_API_URL);
+    if (provider === "cloudflare") {
+      return Boolean(String(settings?.accountId || "").trim() && String(settings?.apiToken || "").trim());
+    }
+    if (provider === "typesafe") return Boolean(String(settings?.apiToken || "").trim());
+    return Boolean(validHttpsUrl(settings?.compatibleUrl) && String(settings?.apiToken || "").trim());
   }
 
   function pageType(url) {
@@ -192,6 +213,8 @@
     BLOCK_THRESHOLD,
     DECISION_POLICY_VERSION,
     MODEL,
+    HOSTED_API_URL,
+    TYPESAFE_SYSTEMONE_URL,
     blockThresholdForPage,
     cacheEntryValid,
     cacheKey,
@@ -203,9 +226,11 @@
     normalizeTitle,
     pageType,
     pageIdentity,
+    providerMode,
     settingsComplete,
+    validHttpsUrl,
   };
 
-  root.FocusGuardCore = api;
+  root.FocusJevCore = api;
   if (typeof module !== "undefined" && module.exports) module.exports = api;
 })(typeof globalThis !== "undefined" ? globalThis : this);

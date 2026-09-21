@@ -20,7 +20,7 @@ function storageArea(store) {
   };
 }
 
-global.importScripts = () => { global.FocusGuardCore = require("../extension/core.js"); };
+global.importScripts = () => { global.FocusJevCore = require("../extension/core.js"); };
 global.chrome = {
   storage: { local: storageArea(local), session: storageArea(session) },
   tabs: {
@@ -35,6 +35,7 @@ global.chrome = {
     onMessage: { addListener: (listener) => { messageListener = listener; } },
     onInstalled: { addListener: () => {} },
     openOptionsPage: async () => {},
+    getManifest: () => ({ version: "1.4.0" }),
   },
 };
 
@@ -134,13 +135,47 @@ function send(message, sender = {}) {
   assert.equal(attentionFeed.decision.blockThreshold, 0.5);
   assert.equal(fetchCalls, 4);
 
+  global.fetch = async (url, options) => {
+    fetchCalls += 1;
+    lastFetch = { url, options };
+    return { ok: true, json: async () => ({ answers: { should_block: { type: "noul", noul: 0.03 } } }) };
+  };
+  const typesafe = await send({
+    type: "focus-guard-test-jev",
+    settings: { provider: "typesafe", apiToken: "typesafe-key", typesafeModel: "jev-latest" },
+  });
+  assert.equal(typesafe.ok, true);
+  assert.equal(lastFetch.url, "https://api.typesafe.ai/v1/systemone");
+  assert.equal(lastFetch.options.headers.Authorization, "Bearer typesafe-key");
+  assert.equal(JSON.parse(lastFetch.options.body).model, "jev-latest");
+
+  let hostedDecisionRequest;
+  global.fetch = async (url, options) => {
+    fetchCalls += 1;
+    lastFetch = { url, options };
+    if (url === "https://hosted.example/v1/install") {
+      return { ok: true, json: async () => ({ deviceToken: "abcdefghijklmnopqrstuvwx.abcdefghijklmnopqrstuvwxyz012345" }) };
+    }
+    hostedDecisionRequest = { url, options };
+    return { ok: true, json: async () => ({ answers: { should_block: { type: "noul", noul: 0.03 } } }) };
+  };
+  const hosted = await send({
+    type: "focus-guard-test-jev",
+    settings: { provider: "hosted", hostedUrl: "https://hosted.example" },
+  });
+  assert.equal(hosted.ok, true);
+  assert.equal(hostedDecisionRequest.url, "https://hosted.example/v1/decision");
+  assert.match(hostedDecisionRequest.options.headers.Authorization, /^Device /u);
+  assert.match(hostedDecisionRequest.options.headers["X-JEV-Signature"], /^[A-Za-z0-9_-]+$/u);
+
+  const callsBeforeBackground = fetchCalls;
   windowFocused = false;
   const background = await send({
     type: "focus-guard-decide",
     page: { url: "https://example.com/other", title: "Other" },
   }, sender);
   assert.equal(background.decision.source, "background-tab");
-  assert.equal(fetchCalls, 4);
+  assert.equal(fetchCalls, callsBeforeBackground, "background tabs must not spend a provider call");
 
   windowFocused = true;
   global.fetch = async () => { throw new Error("network down"); };

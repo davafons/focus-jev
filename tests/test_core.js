@@ -46,6 +46,12 @@ assert.equal(Core.cacheEntryValid({ decision: blocked, cachedAt: 0 }, Date.now()
 assert.equal(Core.cacheEntryValid({ decision: related, cachedAt: 0 }, Date.now()), false);
 assert.equal(Core.cacheEntryValid({ decision: { ...blocked, policyVersion: 1 }, cachedAt: Date.now() }), false);
 assert.equal(Core.settingsComplete({ accountId: "account", apiToken: "token" }), true);
+assert.equal(Core.providerMode({ accountId: "account", apiToken: "token" }), "cloudflare");
+assert.equal(Core.settingsComplete({ provider: "typesafe", apiToken: "token" }), true);
+assert.equal(Core.settingsComplete({ provider: "hosted", hostedUrl: "https://api.example.com" }), true);
+assert.equal(Core.settingsComplete({ provider: "hosted", hostedUrl: "http://api.example.com" }), false);
+assert.equal(Core.settingsComplete({ provider: "compatible", compatibleUrl: "https://provider.example/v1/systemone", apiToken: "token" }), true);
+assert.equal(Core.TYPESAFE_SYSTEMONE_URL, "https://api.typesafe.ai/v1/systemone");
 assert.equal(Core.isGatewayPage("https://www.youtube.com/"), true);
 assert.equal(Core.isGatewayPage("https://www.youtube.com/results?search_query=jev"), true);
 assert.equal(Core.isGatewayPage("https://www.youtube.com/watch?v=abc"), false);

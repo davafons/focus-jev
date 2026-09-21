@@ -17,22 +17,55 @@
 
       <section>
         <h2>JEV connection</h2>
-        <p class="intro">Use your Cloudflare account to evaluate pages with JEV.</p>
+        <p class="intro">Choose where JEV runs. Bring-your-own-key modes send page data directly to that provider.</p>
 
-        <label for="account-id">Cloudflare account ID</label>
-        <input id="account-id" autocomplete="off" spellcheck="false">
+        <label for="provider">Provider</label>
+        <select id="provider">
+          <option value="hosted">Focus Guard hosted service</option>
+          <option value="cloudflare">Cloudflare AI (your account)</option>
+          <option value="typesafe">TypeSafe JEV (your API key)</option>
+          <option value="compatible">Compatible System One endpoint</option>
+        </select>
 
-        <label for="api-token">Cloudflare API token</label>
-        <input id="api-token" type="password" autocomplete="off" spellcheck="false">
+        <div id="hosted-fields">
+          <label for="hosted-url">Hosted API URL</label>
+          <input id="hosted-url" type="url" inputmode="url" placeholder="https://api.example.com" autocomplete="off" spellcheck="false">
+          <p class="field-note">The hosted service assigns this browser a revocable, quota-limited device credential. It processes the decision request and is designed not to retain page content.</p>
+        </div>
 
-        <label for="gateway-id">AI Gateway ID</label>
-        <input id="gateway-id" value="jev-local" autocomplete="off" spellcheck="false">
+        <div id="cloudflare-fields">
+          <label for="account-id">Cloudflare account ID</label>
+          <input id="account-id" autocomplete="off" spellcheck="false">
 
-        <details>
-          <summary>Gateway authentication <span>Optional</span></summary>
-          <label for="gateway-token">Gateway token</label>
-          <input id="gateway-token" type="password" autocomplete="off" spellcheck="false">
-        </details>
+          <label for="api-token">Cloudflare API token</label>
+          <input id="api-token" type="password" autocomplete="off" spellcheck="false">
+
+          <label for="gateway-id">AI Gateway ID</label>
+          <input id="gateway-id" value="jev-local" autocomplete="off" spellcheck="false">
+
+          <details>
+            <summary>Gateway authentication <span>Optional</span></summary>
+            <label for="gateway-token">Gateway token</label>
+            <input id="gateway-token" type="password" autocomplete="off" spellcheck="false">
+          </details>
+        </div>
+
+        <div id="typesafe-fields">
+          <label for="typesafe-api-token">TypeSafe API key</label>
+          <input id="typesafe-api-token" type="password" autocomplete="off" spellcheck="false">
+          <label for="typesafe-model">Model</label>
+          <input id="typesafe-model" value="jev-latest" autocomplete="off" spellcheck="false">
+        </div>
+
+        <div id="compatible-fields">
+          <label for="compatible-url">System One API URL</label>
+          <input id="compatible-url" type="url" inputmode="url" placeholder="https://provider.example/v1/systemone" autocomplete="off" spellcheck="false">
+          <label for="compatible-api-token">Bearer API key</label>
+          <input id="compatible-api-token" type="password" autocomplete="off" spellcheck="false">
+          <label for="compatible-model">Model</label>
+          <input id="compatible-model" value="jev-latest" autocomplete="off" spellcheck="false">
+          <p class="field-note">This endpoint must accept TypeSafe's System One request format and return an object with <code>answers</code>.</p>
+        </div>
 
         <div class="actions">
           <button id="save" class="primary" type="button">Save</button>
@@ -43,8 +76,8 @@
 
       <section class="privacy">
         <h2>Data and privacy</h2>
-        <p>Your focus statement and public page metadata are sent only to Cloudflare for each live decision. Credentials and session state stay in this browser profile.</p>
-        <p>Use a narrowly scoped token. Browser extension storage is profile-local, not a system keychain.</p>
+        <p>Bring-your-own-key modes send your focus statement and limited public page metadata directly to the provider you choose. Hosted mode sends the same limited decision input to the Focus Guard service before it calls JEV.</p>
+        <p>Credentials and session state stay in this browser profile. Use narrowly scoped keys: browser extension storage is profile-local, not a system keychain.</p>
       </section>
     </main>
     <script src="options.js"></script>

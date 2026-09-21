@@ -9,19 +9,21 @@ When a focus session is active, Focus Guard processes:
 - the focus statement you wrote;
 - the active page URL and title;
 - limited public page metadata, such as a description, main heading, author, content type, and structured JSON-LD metadata;
-- your Cloudflare account ID, API token, AI Gateway ID, and optional gateway token.
+- the selected provider configuration: a Cloudflare account ID/API token and optional AI Gateway token, a TypeSafe API key, a compatible-provider bearer key, or a hosted-service device credential.
 
 Focus Guard does not read form fields, cookies, passwords, private messages, page screenshots, or the full page body.
 
 ## Where data goes
 
-The focus statement and active-page metadata are sent over HTTPS to Cloudflare's API so the `typesafe/jev` model can return a decision. Cloudflare credentials are sent only to Cloudflare for authentication. The project maintainers do not operate an intermediary server and do not receive this data.
+In bring-your-own-key mode, the focus statement and active-page metadata are sent over HTTPS directly to the provider you choose so JEV can return a decision. The extension sends credentials only to that selected provider for authentication.
 
-Cloudflare or an AI Gateway configured in your account may retain request logs according to your Cloudflare settings and Cloudflare's policies. Review those settings before use.
+In hosted-service mode, the same limited decision input is sent to the Focus Guard gateway, which validates a revocable device credential, applies quota and abuse controls, and forwards a fixed JEV request to its configured provider. The production Worker has invocation logging disabled and does not retain focus statements, URLs, titles, descriptions, request bodies, or provider keys in its application logs. It can technically process the plaintext request in transit; hosted mode is therefore not equivalent to the direct/BYOK privacy path.
+
+Your selected provider may retain request logs according to its settings and policies. Review those settings before use. The hosted service's retention and operational logging policy will be published at a stable LOST COORDS URL before public release.
 
 ## Local storage
 
-Credentials and the current focus are stored in `chrome.storage.local` in your browser profile. Page decisions and counters are stored in `chrome.storage.session` and are cleared when the focus session ends or the browser session is discarded. Focus Guard does not use a system keychain.
+Credentials and the current focus are stored in `chrome.storage.local` in your browser profile. Page decisions and counters are stored in `chrome.storage.session` and are cleared when the focus session ends or the browser session is discarded. Provider requests use `credentials: "omit"`; the extension neither reads nor sends website cookies. Focus Guard does not use a system keychain.
 
 ## Data use
 
@@ -29,7 +31,7 @@ Focus Guard uses this data only to provide page-alignment decisions, display ses
 
 ## Control and deletion
 
-End the focus session to clear session decisions. Remove credentials in the Settings page or uninstall the extension to remove extension-owned local data through the browser.
+End the focus session to clear session decisions. Remove credentials in the Settings page or uninstall the extension to remove extension-owned local data through the browser. Removing a hosted device credential only removes it locally; a future hosted account page will provide server-side device revocation.
 
 ## Changes and questions
 

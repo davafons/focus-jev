@@ -1,11 +1,13 @@
-importScripts("core.js");
+// Chrome runs a module-less MV3 service worker; Firefox loads core.js first
+// from the generated event-page manifest.
+if (typeof importScripts === "function") importScripts("core.js");
 
-const Core = FocusGuardCore;
-const STATE_KEY = "focusGuardState";
+const Core = FocusJevCore;
+const STATE_KEY = "focusJevState";
 const SETTINGS_KEY = "jevSettings";
-const CACHE_KEY = "focusGuardDecisionCache";
-const STATS_KEY = "focusGuardStats";
-const TAB_PREFIX = "focusGuardTabDecision:";
+const CACHE_KEY = "focusJevDecisionCache";
+const STATS_KEY = "focusJevStats";
+const TAB_PREFIX = "focusJevTabDecision:";
 const MAX_CACHE_ENTRIES = 500;
 const inFlight = new Map();
 
@@ -61,7 +63,16 @@ async function senderIsFocused(sender) {
   }
 }
 
-async function fetchJev(settings, request, timeoutMs = 10_000) {
+async function responseJson(response, provider) {
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok || body?.success === false) {
+    const message = body?.errors?.[0]?.message || body?.error?.message || body?.error || `${provider} returned ${response.status}`;
+    throw new Error(String(message));
+  }
+  return body;
+}
+
+async function fetchCloudflare(settings, request, timeoutMs) {
   const accountId = encodeURIComponent(String(settings.accountId).trim());
   const gatewayId = String(settings.gatewayId || "jev-local").trim();
   const headers = {
@@ -79,19 +90,152 @@ async function fetchJev(settings, request, timeoutMs = 10_000) {
       `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run`,
       {
         method: "POST",
+        credentials: "omit",
         headers,
         body: JSON.stringify({ model: Core.MODEL, input: request }),
         signal: controller.signal,
       },
     );
-    const body = await response.json().catch(() => ({}));
-    if (!response.ok || body?.success === false) {
-      const message = body?.errors?.[0]?.message || `Cloudflare returned ${response.status}`;
-      throw new Error(message);
-    }
-    return body;
+    return responseJson(response, "Cloudflare");
   } finally {
     clearTimeout(timer);
+  }
+}
+
+async function fetchTypeSafe(settings, request, timeoutMs) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(Core.TYPESAFE_SYSTEMONE_URL, {
+      method: "POST",
+      credentials: "omit",
+      headers: {
+        "Authorization": `Bearer ${String(settings.apiToken).trim()}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ...request, model: String(settings.typesafeModel || "jev-latest").trim() }),
+      signal: controller.signal,
+    });
+    return responseJson(response, "TypeSafe");
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function fetchCompatible(settings, request, timeoutMs) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(String(settings.compatibleUrl).trim(), {
+      method: "POST",
+      credentials: "omit",
+      headers: {
+        "Authorization": `Bearer ${String(settings.apiToken).trim()}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ...request, model: String(settings.compatibleModel || "jev-latest").trim() }),
+      signal: controller.signal,
+    });
+    return responseJson(response, "Provider");
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function base64Url(bytes) {
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/u, "");
+}
+
+function base64UrlBytes(value) {
+  const text = String(value || "");
+  const padded = text.replaceAll("-", "+").replaceAll("_", "/") + "=".repeat((4 - text.length % 4) % 4);
+  return Uint8Array.from(atob(padded), (character) => character.charCodeAt(0));
+}
+
+async function digestBase64(text) {
+  return base64Url(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text))));
+}
+
+function randomNonce() {
+  const bytes = new Uint8Array(24);
+  crypto.getRandomValues(bytes);
+  return base64Url(bytes);
+}
+
+async function hostedSettings(settings) {
+  if (String(settings.deviceToken || "").trim()) return settings;
+  const baseUrl = String(settings.hostedUrl || Core.HOSTED_API_URL).trim().replace(/\/$/u, "");
+  const response = await fetch(`${baseUrl}/v1/install`, {
+    method: "POST",
+    credentials: "omit",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ extensionVersion: chrome.runtime.getManifest().version }),
+  });
+  const body = await responseJson(response, "Hosted service");
+  if (!String(body.deviceToken || "").trim()) throw new Error("Hosted service did not issue a device credential.");
+  const updated = { ...settings, deviceToken: body.deviceToken };
+  await chrome.storage.local.set({ [SETTINGS_KEY]: updated });
+  return updated;
+}
+
+async function signedHostedRequest(settings, path, method, body, timeoutMs) {
+  const configured = await hostedSettings(settings);
+  const match = /^([A-Za-z0-9_-]{20,80})\.([A-Za-z0-9_-]{20,128})$/u.exec(String(configured.deviceToken || ""));
+  if (!match) throw new Error("Hosted service device credential is invalid. Save Settings to register again.");
+  const baseUrl = String(configured.hostedUrl || Core.HOSTED_API_URL).trim().replace(/\/$/u, "");
+  const endpoint = new URL(`${baseUrl}${path}`);
+  const timestamp = String(Date.now());
+  const nonce = randomNonce();
+  const canonical = `${method}\n${endpoint.pathname}\n${timestamp}\n${nonce}\n${await digestBase64(body)}`;
+  const key = await crypto.subtle.importKey("raw", base64UrlBytes(match[2]), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const signature = base64Url(new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(canonical))));
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(endpoint.href, {
+      method,
+      credentials: "omit",
+      headers: {
+        "Authorization": `Device ${configured.deviceToken}`,
+        "X-JEV-Nonce": nonce,
+        "X-JEV-Signature": signature,
+        "X-JEV-Timestamp": timestamp,
+        ...(body ? { "Content-Type": "application/json" } : {}),
+      },
+      ...(body ? { body } : {}),
+      signal: controller.signal,
+    });
+    return responseJson(response, "Hosted service");
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function fetchHosted(settings, request, timeoutMs) {
+  const body = JSON.stringify({
+    focus: request.state.focus_statement,
+    page: {
+      url: request.state.page.url,
+      title: request.state.page.title,
+      description: request.state.page.context,
+    },
+  });
+  return signedHostedRequest(settings, "/v1/decision", "POST", body, timeoutMs);
+}
+
+async function hostedUsage(settings) {
+  return signedHostedRequest(settings, "/v1/status", "GET", "", 5_000);
+}
+
+async function fetchJev(settings, request, timeoutMs = 10_000) {
+  switch (Core.providerMode(settings)) {
+    case "cloudflare": return fetchCloudflare(settings, request, timeoutMs);
+    case "typesafe": return fetchTypeSafe(settings, request, timeoutMs);
+    case "compatible": return fetchCompatible(settings, request, timeoutMs);
+    case "hosted": return fetchHosted(settings, request, timeoutMs);
+    default: throw new Error("Choose a supported JEV provider in Settings.");
   }
 }
 
@@ -145,7 +289,7 @@ async function decideForPage(message, sender) {
     return { action: "allow", reason: "Background tabs are checked when focused.", source: "background-tab", interrupt: false };
   }
   if (!Core.settingsComplete(settings)) {
-    return { action: "allow", reason: "Add JEV credentials in Settings to enable decisions.", source: "setup-required", interrupt: false };
+    return { action: "allow", reason: "Configure a JEV provider in Settings to enable decisions.", source: "setup-required", interrupt: false };
   }
 
   const page = {
@@ -202,6 +346,7 @@ async function diagnostics() {
   return {
     focus,
     configured: Core.settingsComplete(settings),
+    provider: Core.providerMode(settings),
     tab: tab ? { id: tab.id, url: tab.url || "", title: tab.title || "" } : null,
     decision,
     stats: session.stats,
@@ -230,7 +375,7 @@ async function startFocus(goal) {
   const cleaned = String(goal || "").trim().slice(0, 8_000);
   if (!cleaned) throw new Error("Write what you want to focus on first.");
   const { settings } = await localState();
-  if (!Core.settingsComplete(settings)) throw new Error("Add your JEV credentials in Settings first.");
+  if (!Core.settingsComplete(settings)) throw new Error("Configure a JEV provider in Settings first.");
   const focus = { active: true, goal: cleaned, sessionId: crypto.randomUUID(), startedAt: Date.now() };
   await chrome.storage.local.set({ [STATE_KEY]: focus });
   await clearSessionDecisions();
@@ -294,17 +439,27 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       });
       break;
     case "focus-guard-save-settings":
-      task = chrome.storage.local.set({ [SETTINGS_KEY]: message.settings || {} })
+      task = Promise.resolve().then(() => {
+        const settings = message.settings || {};
+        if (!Core.settingsComplete(settings)) throw new Error("Complete the selected provider settings first.");
+        return chrome.storage.local.set({ [SETTINGS_KEY]: settings });
+      })
         .then(() => notifyTabs("focus-guard-check-now", { force: true }))
         .then(() => ({ ok: true }));
       break;
     case "focus-guard-get-settings":
       task = localState().then(({ settings }) => ({ ok: true, settings }));
       break;
+    case "focus-guard-hosted-usage":
+      task = localState().then(({ settings }) => {
+        if (Core.providerMode(settings) !== "hosted") return { ok: true, usage: null };
+        return hostedUsage(settings).then((usage) => ({ ok: true, usage }));
+      });
+      break;
     case "focus-guard-test-jev":
       task = (async () => {
         const settings = message.settings || {};
-        if (!Core.settingsComplete(settings)) throw new Error("Account ID and API token are required.");
+        if (!Core.settingsComplete(settings)) throw new Error("Complete the selected provider settings first.");
         const response = await fetchJev(settings, Core.jevRequest(
           "Verify that JEV can evaluate whether a setup page supports configuring Focus Guard.",
           { url: "https://example.com/focus-guard-setup", title: "Focus Guard setup", description: "Extension configuration" },

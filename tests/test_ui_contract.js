@@ -20,9 +20,10 @@ assertScriptIdsExist("blocked");
 const popup = fs.readFileSync(path.join(extension, "popup.html"), "utf8");
 assert.doesNotMatch(popup, />Current focus</i);
 assert.doesNotMatch(popup, />Current page</i);
-assert.doesNotMatch(popup, />Ready when you are</i);
+assert.doesNotMatch(popup, /<h1[^>]*>Focus Guard/i);
 assert.match(popup, /<textarea[^>]+maxlength="8000"/);
 assert.match(popup, /By starting, you agree to send this focus/);
+assert.match(popup, /selected provider/);
 
 const manifest = JSON.parse(fs.readFileSync(path.join(extension, "manifest.json"), "utf8"));
 const packageJSON = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "package.json"), "utf8"));

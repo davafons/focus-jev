@@ -29,12 +29,15 @@ section:first-of-type { border-top: 0; padding-top: 0; }
 h2 { font-size: 19px; letter-spacing: -.015em; }
 .intro { margin-top: 5px; color: var(--secondary); }
 label { display: block; margin: 19px 0 7px; font-size: 13px; font-weight: 650; }
-input {
+input, select {
   width: 100%; height: 48px; border: 1px solid transparent; border-radius: 12px; padding: 0 13px;
   color: var(--text); background: var(--field); font: inherit; outline: none;
 }
-input:hover { border-color: var(--separator); }
-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 17%, transparent); }
+input:hover, select:hover { border-color: var(--separator); }
+input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 17%, transparent); }
+[hidden] { display: none !important; }
+.field-note { margin-top: 8px; color: var(--secondary); font-size: 13px; }
+.field-note code { font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
 details { margin-top: 21px; padding-top: 18px; border-top: 1px solid var(--separator); }
 summary { color: var(--secondary); cursor: pointer; font-size: 13px; font-weight: 650; }
 summary span { margin-left: 5px; color: var(--tertiary); font-weight: 450; }

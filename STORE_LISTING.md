@@ -15,7 +15,7 @@ Focus Guard compares the active page's public metadata with a user-written focus
 ## Permission justifications
 
 - `storage`: stores JEV connection settings and the active focus locally, and keeps decision caches for the browser session.
-- `http://*/*` and `https://*/*`: runs the page guard and reads the active page URL, title, and limited public metadata on pages the user visits. The extension needs broad coverage because focus enforcement applies across browsing destinations. HTTPS access also sends the focus statement and active-page metadata to the user's Cloudflare account for a JEV decision.
+- `http://*/*` and `https://*/*`: runs the page guard and reads the active page URL, title, and limited public metadata on pages the user visits. The extension needs broad coverage because focus enforcement applies across browsing destinations. HTTPS access sends the focus statement and active-page metadata to the provider selected by the user for a JEV decision; hosted mode sends it first to the Focus Guard gateway.
 
 ## Remote code
 
@@ -25,7 +25,7 @@ No remote code is downloaded or executed. All executable JavaScript ships in the
 
 Disclose these categories in the Chrome Web Store Privacy tab:
 
-- authentication information (Cloudflare credentials);
+- authentication information (the selected provider credential or a hosted-service device credential);
 - website content (limited public metadata);
 - web history (active-page URL and title);
 - user-generated content (the focus statement).
@@ -35,7 +35,7 @@ The data is used only for the extension's user-facing focus enforcement, is sent
 ## Release checklist
 
 - Run `npm run check`.
-- Run `npm run package` and upload the ZIP from `dist/`.
+- Run `npm run package` and upload `focus-jev-chrome-*.zip` from `dist/`.
 - Verify the ZIP contains `manifest.json` at its root.
 - Capture store screenshots at the required dimensions.
 - Publish the privacy policy at a stable public URL.

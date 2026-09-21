@@ -1,0 +1,51 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "focus-jev-api",
+  "account_id": "1745c65c70c5efcde26eed7a4d79d42d",
+  "main": "src/index.mjs",
+  "routes": [
+    {
+      "pattern": "api.focus-jev.lostcoords.com",
+      "custom_domain": true
+    }
+  ],
+  "workers_dev": true,
+  "compatibility_date": "2026-09-21",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": false
+  },
+  "ai": {
+    "binding": "AI"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "focus-jev",
+      "database_id": "db35b006-d3d3-401c-90aa-299315c20274"
+    }
+  ],
+  "ratelimits": [
+    {
+      "name": "DECISION_RATE_LIMITER",
+      "namespace_id": "81264501",
+      "simple": { "limit": 30, "period": 60 }
+    },
+    {
+      "name": "INSTALL_RATE_LIMITER",
+      "namespace_id": "81264502",
+      "simple": { "limit": 5, "period": 60 }
+    }
+  ],
+  "vars": {
+    "JEV_PROVIDER": "cloudflare",
+    "AI_GATEWAY_ID": "default",
+    "TYPESAFE_MODEL": "jev-latest",
+    "COMPATIBLE_SYSTEMONE_URL": "",
+    "COMPATIBLE_MODEL": "jev-latest",
+    "FREE_MONTHLY_LIMIT": "500",
+    "GLOBAL_MONTHLY_LIMIT": "25000",
+    "EXTENSION_ID": ""
+  },
+  "secrets": { "required": [] }
+}

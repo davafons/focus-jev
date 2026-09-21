@@ -1,6 +1,7 @@
 const $ = (id) => document.getElementById(id);
 let diagnostics = null;
 let requestedCheckFor = "";
+let usageLoadedFor = "";
 
 function send(message) {
   return new Promise((resolve) => {
@@ -36,10 +37,10 @@ function render(value) {
   $("start").disabled = !configured;
   $("elapsed-label").textContent = focus.active ? elapsedLabel(focus.startedAt) : "";
   $("status-line").classList.toggle("hidden", !focus.active);
+  $("ready-caption").classList.toggle("hidden", focus.active);
   $("stop").classList.toggle("hidden", !focus.active);
   if (!focus.active && !$("goal").value) $("goal").value = focus.goal || "";
   $("active-goal").textContent = focus.goal || "";
-  $("page-section").classList.toggle("hidden", !focus.active);
 
   $("page-title").textContent = tab?.title || "No page selected";
   const badge = $("decision-badge");
@@ -49,7 +50,7 @@ function render(value) {
     ? (decision.action === "block" ? "Blocked" : "Allowed")
     : (focus.active ? "Checking" : "Not checked");
   $("decision-reason").textContent = decision?.reason
-    || (focus.active ? "Evaluating this page…" : "");
+    || (focus.active ? "Evaluating this page…" : "Start a focus session to evaluate pages.");
   $("decision-meta").classList.toggle("hidden", !decision);
   if (decision) {
     const score = Number(decision.confidence);
@@ -69,6 +70,19 @@ function render(value) {
   $("recheck").classList.toggle("hidden", !focus.active || !decision);
 }
 
+async function refreshUsage(value) {
+  const key = `${value.provider || ""}:${value.configured ? "configured" : "not-configured"}`;
+  if (usageLoadedFor === key) return;
+  usageLoadedFor = key;
+  $("usage-count").textContent = "";
+  if (!value.configured || value.provider !== "hosted") return;
+  const response = await send({ type: "focus-guard-hosted-usage" });
+  const remaining = Number(response?.usage?.remaining);
+  if (response?.ok && Number.isFinite(remaining)) {
+    $("usage-count").textContent = `${remaining} hosted decisions left this month`;
+  }
+}
+
 async function refresh() {
   const response = await send({ type: "focus-guard-diagnostics" });
   if (!response.ok) {
@@ -77,6 +91,7 @@ async function refresh() {
   }
   showMessage("");
   render(response.diagnostics);
+  refreshUsage(response.diagnostics);
   const pendingKey = `${response.diagnostics.focus.sessionId || ""}:${response.diagnostics.tab?.id || ""}:${response.diagnostics.tab?.url || ""}`;
   if (
     response.diagnostics.focus.active

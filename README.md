@@ -31,24 +31,30 @@ Decisions are cached by session, normalized URL, and title. Blocks last for the 
 2. Enable **Developer mode**.
 3. Choose **Load unpacked**.
 4. Select the [`extension`](extension/) directory.
-5. Open Settings and add a Cloudflare account ID and narrowly scoped API token that can run `typesafe/jev`. The AI Gateway ID defaults to `jev-local`.
+5. Open Settings and choose a provider:
+   - **Cloudflare AI**: add an account ID and narrowly scoped API token that can run `typesafe/jev`.
+   - **TypeSafe JEV**: add your TypeSafe API key; the extension calls TypeSafe directly.
+   - **Compatible System One endpoint**: add a direct endpoint and bearer key when it accepts the same typed JEV request/response contract.
+   - **Focus Guard hosted service**: uses `https://api.focus-jev.lostcoords.com` for a small, quota-limited allowance; you may point it at a self-hosted compatible deployment instead.
 
 ## Privacy
 
-Before a session starts, the extension discloses that the focus statement and each active page's URL, title, and public metadata are sent to Cloudflare for a JEV decision. Credentials and state are stored in the browser profile. The maintainers operate no intermediary service and receive none of this data.
+Before a session starts, the extension discloses its data path. Bring-your-own-key modes send the focus statement and limited page metadata directly to the selected provider. Hosted mode sends the same limited input to the Focus Guard service, which processes it without retaining page content before requesting JEV. Credentials and state are stored in the browser profile.
+
+The hosted Worker implementation, provider facade, schema, and deployment steps are in [worker/](worker/). The larger threat model and rollout plan are in [docs/INFRASTRUCTURE.md](docs/INFRASTRUCTURE.md).
 
 Read the complete [privacy policy](PRIVACY.md) and [security policy](SECURITY.md). Chrome Web Store permission and disclosure copy is maintained in [STORE_LISTING.md](STORE_LISTING.md).
 
 ## Development
 
-There are no runtime dependencies and no build step.
+There are no runtime dependencies. The release toolchain builds both Chromium and Firefox packages.
 
 ```sh
 npm run check
 npm run package
 ```
 
-`npm run package` creates a validated store-ready archive in `dist/` with `manifest.json` at the ZIP root.
+`npm run package` creates validated Chrome and Firefox archives in `dist/`, each with `manifest.json` at the ZIP root. Firefox is built with a Firefox-specific MV3 manifest and includes the required data-transmission disclosure.
 
 The test suite covers decision thresholds, gateway behavior, attention feeds, exact-page caching, manual rechecks, background tabs, network fallback, full-page blocking, metadata extraction, polling efficiency, and the HTML/JavaScript UI contract.
 
@@ -65,7 +71,7 @@ scripts/     Reproducible release packaging
 
 ## Release
 
-The GitHub workflow runs syntax checks and tests, builds the extension ZIP, and uploads it as a workflow artifact. Before a public store submission, follow the checklist in [STORE_LISTING.md](STORE_LISTING.md), publish the privacy policy at a stable URL, and complete a clean-profile browser test.
+The GitHub CI workflow runs checks, tests, and both packages on every push and pull request. Pushing a `v*` tag creates a GitHub Release with both ZIPs. If the repository secret `CLOUDFLARE_API_TOKEN` is configured with access to the LOST COORDS Worker and D1 database, that same tag also migrates and deploys the Worker. Before a public store submission, follow the checklist in [STORE_LISTING.md](STORE_LISTING.md), publish the privacy policy at a stable URL, and complete a clean-profile browser test.
 
 ## License
 

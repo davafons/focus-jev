@@ -1,14 +1,16 @@
 :root {
   color-scheme: light dark;
-  --bg: #f5f5f7;
-  --text: #1d1d1f;
-  --secondary: #6e6e73;
-  --tertiary: #8e8e93;
-  --separator: rgba(60, 60, 67, .18);
-  --control: rgba(118, 118, 128, .12);
-  --field: rgba(255, 255, 255, .72);
-  --accent: #007aff;
-  --accent-hover: #006ee6;
+  --bg: #edf2f6;
+  --text: #14202c;
+  --secondary: #627181;
+  --tertiary: #8190a0;
+  --separator: rgba(81, 101, 121, .25);
+  --control: rgba(103, 125, 147, .14);
+  --field: rgba(255, 255, 255, .88);
+  --accent: #526f8b;
+  --accent-hover: #405f7c;
+  --primary-bg: #f7fafc;
+  --primary-text: #16212c;
   --green: #248a3d;
   --green-bg: rgba(52, 199, 89, .12);
   --red: #d70015;
@@ -20,15 +22,17 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #1c1c1e;
-    --text: #f5f5f7;
-    --secondary: #aeaeb2;
-    --tertiary: #8e8e93;
-    --separator: rgba(84, 84, 88, .62);
-    --control: rgba(118, 118, 128, .2);
-    --field: rgba(44, 44, 46, .82);
-    --accent: #0a84ff;
-    --accent-hover: #3198ff;
+    --bg: #111b26;
+    --text: #f4f7fb;
+    --secondary: #aab7c5;
+    --tertiary: #8190a0;
+    --separator: rgba(151, 172, 193, .24);
+    --control: rgba(132, 153, 175, .17);
+    --field: rgba(11, 19, 28, .78);
+    --accent: #90a9c0;
+    --accent-hover: #b0c4d6;
+    --primary-bg: #f1f5f8;
+    --primary-text: #17212b;
     --green: #30d158;
     --green-bg: rgba(48, 209, 88, .13);
     --red: #ff6961;
@@ -44,16 +48,17 @@ body {
     radial-gradient(circle at 18% -8%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 42%),
     var(--bg);
 }
-main { padding: 20px 20px 16px; }
-header { display: flex; min-height: 30px; align-items: center; gap: 10px; margin-bottom: 18px; }
-.mark { display: grid; width: 28px; height: 28px; place-items: center; color: var(--text); }
-.mark svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.65; stroke-linejoin: round; }
+main { padding: 28px 28px 22px; }
+header { display: flex; min-height: 58px; align-items: center; gap: 14px; margin-bottom: 35px; }
+.mark { display: grid; width: 56px; height: 56px; place-items: center; border-radius: 15px; color: var(--text); background: var(--control); }
+.mark svg { width: 30px; height: 30px; fill: none; stroke: currentColor; stroke-width: 1.65; stroke-linejoin: round; }
+.header-copy { min-width: 0; }
+.ready-caption { margin: 0; color: var(--secondary); font-size: 17px; font-weight: 610; letter-spacing: -.018em; }
 .status-line { display: flex; align-items: center; gap: 8px; color: var(--secondary); font-size: 12px; font-weight: 600; }
-.prompt { display: block; margin: 0; font-size: 23px; font-weight: 720; letter-spacing: -.035em; line-height: 1.15; }
-.hint { margin: 8px 0 15px; color: var(--secondary); font-size: 13px; line-height: 1.45; }
+.prompt { display: block; margin: 0 0 20px; font-size: 27px; font-weight: 740; letter-spacing: -.04em; line-height: 1.15; }
 textarea {
-  width: 100%; min-height: 154px; resize: vertical; border: 1px solid var(--separator);
-  border-radius: 14px; padding: 13px 14px; color: var(--text); background: var(--field);
+  width: 100%; min-height: 226px; resize: vertical; border: 1px solid var(--separator);
+  border-radius: 17px; padding: 18px 19px; color: var(--text); background: var(--field);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.04); font: inherit; line-height: 1.5; outline: none;
 }
 textarea::placeholder { color: var(--tertiary); }
@@ -62,10 +67,10 @@ button { border: 0; font: inherit; cursor: pointer; }
 button:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 34%, transparent); outline-offset: 2px; }
 .primary {
   display: flex; width: 100%; min-height: 46px; align-items: center; justify-content: space-between;
-  margin-top: 13px; border-radius: 13px; padding: 0 16px; color: white; background: var(--accent);
+  margin-top: 18px; border-radius: 15px; padding: 0 20px; color: var(--primary-text); background: var(--primary-bg);
   font-weight: 700; transition: background .14s ease, transform .14s ease;
 }
-.primary:hover { background: var(--accent-hover); }
+.primary:hover { background: white; }
 .primary:active { transform: scale(.992); }
 .primary:disabled { opacity: .38; cursor: not-allowed; }
 .page-row, footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -77,10 +82,10 @@ button:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 34%, 
   margin: 0; max-height: 152px; overflow: auto; white-space: pre-wrap;
   font-size: 17px; font-weight: 570; line-height: 1.5; letter-spacing: -.012em;
 }
-.page-section { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--separator); }
+.page-section { margin-top: 28px; padding-top: 25px; border-top: 1px solid var(--separator); }
 .page-row { align-items: flex-start; }
-.page-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 650; }
-.decision-reason { margin: 7px 0 0; color: var(--secondary); font-size: 13px; line-height: 1.42; }
+.page-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 20px; font-weight: 720; letter-spacing: -.025em; }
+.decision-reason { margin: 11px 0 0; color: var(--secondary); font-size: 15px; line-height: 1.42; }
 .decision-meta { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 11px; }
 .decision-meta span, .badge {
   border-radius: 999px; padding: 4px 8px; color: var(--secondary); background: var(--control);
@@ -88,7 +93,7 @@ button:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 34%, 
 }
 .badge.allow { color: var(--green); background: var(--green-bg); }
 .badge.block { color: var(--red); background: var(--red-bg); }
-footer { margin-top: 17px; padding-top: 13px; border-top: 1px solid var(--separator); }
+footer { margin-top: 21px; padding-top: 14px; border-top: 1px solid var(--separator); }
 .activity-count { min-height: 18px; color: var(--tertiary); font-size: 11px; }
 .footer-actions { display: flex; align-items: center; gap: 3px; margin-left: auto; }
 .icon-button { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 9px; color: var(--secondary); background: transparent; }

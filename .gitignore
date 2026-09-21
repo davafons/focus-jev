@@ -1,6 +1,9 @@
 .DS_Store
 .env
 .env.*
+.dev.vars
+.wrangler/
+worker-configuration.d.ts
 *.pem
 *.key
 *.zip
