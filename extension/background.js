@@ -349,13 +349,15 @@ function decisionMatchesTab(decision, tab) {
   );
 }
 
-async function diagnostics() {
-  const [{ focus, settings }, tabs, session] = await Promise.all([
+async function diagnostics(tabId) {
+  const tabRequest = typeof tabId === "number" && typeof chrome.tabs.get === "function"
+    ? chrome.tabs.get(tabId).catch(() => null)
+    : chrome.tabs.query({ active: true, lastFocusedWindow: true }).then(([tab]) => tab || null);
+  const [{ focus, settings }, tab, session] = await Promise.all([
     localState(),
-    chrome.tabs.query({ active: true, currentWindow: true }),
+    tabRequest,
     sessionValues(),
   ]);
-  const tab = tabs[0] || null;
   const internal = isInternalPage(tab?.url);
   let decision = null;
   if (!internal && typeof tab?.id === "number") {
@@ -456,7 +458,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       task = decideForPage(message, sender).then((decision) => ({ ok: true, decision }));
       break;
     case "focus-guard-diagnostics":
-      task = diagnostics().then((value) => ({ ok: true, diagnostics: value }));
+      task = diagnostics(message.tabId).then((value) => ({ ok: true, diagnostics: value }));
       break;
     case "focus-guard-blocked-details":
       task = blockedDetails(sender).then((value) => ({ ok: true, ...value }));

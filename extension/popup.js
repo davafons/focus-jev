@@ -3,6 +3,7 @@ let diagnostics = null;
 let requestedCheckFor = "";
 let usageLoadedFor = "";
 let draftInitialized = false;
+let refreshVersion = 0;
 
 function send(message) {
   return new Promise((resolve) => {
@@ -99,7 +100,10 @@ async function refreshUsage(value) {
 }
 
 async function refresh() {
-  const response = await send({ type: "focus-guard-diagnostics" });
+  const version = ++refreshVersion;
+  const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+  const response = await send({ type: "focus-guard-diagnostics", tabId: tab?.id });
+  if (version !== refreshVersion) return;
   if (!response.ok) {
     showMessage(response.error || "Focus Guard could not load.", true);
     return;
@@ -112,6 +116,7 @@ async function refresh() {
     response.diagnostics.focus.active
     && !response.diagnostics.decision
     && response.diagnostics.tab?.id
+    && !response.diagnostics.tab?.internal
     && requestedCheckFor !== pendingKey
   ) {
     requestedCheckFor = pendingKey;
