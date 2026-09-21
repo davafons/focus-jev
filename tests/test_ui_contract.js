@@ -24,7 +24,7 @@ assert.doesNotMatch(popup, /<h1[^>]*>Focus Guard/i);
 assert.match(popup, /<textarea[^>]+rows="5"[^>]+maxlength="8000"/);
 assert.match(popup, /id="allow-music"/);
 assert.match(popup, /id="allow-sns"/);
-assert.match(popup, /id="allow-youtube"/);
+assert.doesNotMatch(popup, /id="allow-youtube"/);
 assert.match(popup, /privacy\.html/);
 assert.match(popup, /limited page metadata are sent to your selected provider/);
 assert.match(popup, /without storing URLs, titles, page metadata, or decisions/);

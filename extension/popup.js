@@ -45,14 +45,12 @@ function render(value) {
     $("goal").value = focus.goal || "";
     $("allow-music").checked = Boolean(focus.allowances?.music);
     $("allow-sns").checked = Boolean(focus.allowances?.sns);
-    $("allow-youtube").checked = Boolean(focus.allowances?.youtube);
     draftInitialized = true;
   }
   $("active-goal").textContent = focus.goal || "";
   $("active-allowances").textContent = [
     focus.allowances?.music && "Music allowed",
     focus.allowances?.sns && "SNS allowed",
-    focus.allowances?.youtube && "YouTube allowed",
   ].filter(Boolean).join(" · ");
 
   $("page-title").textContent = tab?.title || "No page selected";
@@ -94,7 +92,12 @@ async function refreshUsage(value) {
 
 async function refresh() {
   const version = ++refreshVersion;
-  const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+  let tab;
+  try {
+    [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+  } catch {
+    // The background falls back to its last focused browser window.
+  }
   const response = await send({ type: "focus-guard-diagnostics", tabId: tab?.id });
   if (version !== refreshVersion) return;
   if (!response.ok) {
@@ -126,7 +129,6 @@ $("start").addEventListener("click", async () => {
     allowances: {
       music: $("allow-music").checked,
       sns: $("allow-sns").checked,
-      youtube: $("allow-youtube").checked,
     },
   });
   if (!response.ok) {

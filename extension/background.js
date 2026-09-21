@@ -36,7 +36,7 @@ async function localState() {
     focus: stored[STATE_KEY] || {
       active: false,
       goal: "",
-      allowances: { music: false, sns: false, youtube: false },
+      allowances: { music: false, sns: false },
       sessionId: "",
     },
     settings: stored[SETTINGS_KEY] || {},
@@ -362,7 +362,6 @@ function decisionMatchesTab(decision, tab) {
   return Boolean(
     decision && tab
     && Core.pageIdentity(decision.url) === Core.pageIdentity(tab.url)
-    && Core.normalizeTitle(decision.title) === Core.normalizeTitle(tab.title)
   );
 }
 

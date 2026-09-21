@@ -94,6 +94,10 @@ function send(message, sender = {}) {
   }, sender);
   assert.equal(first.decision.action, "block");
   assert.equal(fetchCalls, 1);
+  activeTab.title = "A game — updated title";
+  const titleUpdatedDiagnostics = await send({ type: "focus-guard-diagnostics" });
+  assert.equal(titleUpdatedDiagnostics.diagnostics.decision.action, "block");
+  activeTab.title = "A game";
   const details = await send({ type: "focus-guard-blocked-details" }, sender);
   assert.equal(details.decision.action, "block");
   assert.equal(details.focus.active, true);
