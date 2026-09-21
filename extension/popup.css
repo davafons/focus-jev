@@ -104,9 +104,8 @@ footer { display: grid; width: 100%; max-width: 100%; grid-template-columns: min
 .activity-count { min-width: 0; min-height: 18px; overflow: hidden; color: var(--tertiary); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 .footer-actions { display: flex; width: 66px; min-width: 66px; align-items: center; justify-content: flex-end; gap: 3px; overflow: hidden; }
 .footer-actions .icon-button { margin-left: 2px; }
-.icon-button { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 9px; color: var(--secondary); background: transparent; }
+.icon-button { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 9px; padding: 0; color: var(--secondary); background: transparent; font-family: "Apple Symbols", "Segoe UI Symbol", sans-serif; font-size: 19px; line-height: 1; }
 .icon-button:hover { color: var(--text); background: var(--control); }
-.icon-button svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.65; stroke-linecap: round; stroke-linejoin: round; }
 .note, .message { margin: 9px 0 0; color: var(--secondary); font-size: 12px; }
 .disclosure { margin: 9px 0 0; color: var(--tertiary); font-size: 10px; line-height: 1.38; }
 .disclosure a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
