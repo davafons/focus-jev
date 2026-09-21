@@ -15,6 +15,7 @@ main { width: min(620px, 100%); }
 .page-heading { display: flex; align-items: flex-start; gap: 14px; margin-top: 18px; }
 .page-heading img { width: 34px; height: 34px; flex: 0 0 auto; margin-top: 7px; border-radius: 8px; object-fit: contain; }
 h1 { margin: 0; font-size: clamp(28px, 4.2vw, 40px); line-height: 1.08; letter-spacing: -.04em; overflow-wrap: anywhere; }
+#page-url { margin: 9px 0 0; color: var(--secondary); font-size: 13px; line-height: 1.35; overflow-wrap: anywhere; }
 section { margin-top: 32px; padding-top: 22px; border-top: 1px solid var(--separator); }
 section > span { color: var(--secondary); font-size: 12px; font-weight: 650; }
 #goal { margin: 8px 0 0; max-height: 190px; overflow: auto; white-space: pre-wrap; font-size: 17px; line-height: 1.55; }
