@@ -1,6 +1,6 @@
 # Hosted API Worker
 
-This is the hosted, quota-controlled path for Focus Guard. It deliberately has
+This is the hosted, quota-controlled path for Focus JEV. It deliberately has
 no public provider key. Its provider facade supports Cloudflare AI (the default)
 and TypeSafe's direct JEV API.
 

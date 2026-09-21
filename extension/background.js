@@ -566,8 +566,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const settings = message.settings || {};
         if (!Core.settingsComplete(settings)) throw new Error("Complete the selected provider settings first.");
         const response = await fetchJev(settings, Core.jevRequest(
-          "Verify that JEV can evaluate whether a setup page supports configuring Focus Guard.",
-          { url: "https://example.com/focus-guard-setup", title: "Focus Guard setup", description: "Extension configuration" },
+          "Verify that JEV can evaluate whether a setup page supports configuring Focus JEV.",
+          { url: "https://example.com/focus-jev-setup", title: "Focus JEV setup", description: "Extension configuration" },
         ));
         if (!Object.keys(Core.extractAnswers(response)).length) throw new Error("JEV returned no typed answers.");
         return { ok: true };

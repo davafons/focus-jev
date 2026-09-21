@@ -8,4 +8,4 @@ Include the affected version, reproduction steps, impact, and any suggested miti
 
 ## Credential safety
 
-Focus Guard stores the selected provider credential in the browser profile, not in this repository or a system keychain. Use a narrowly scoped key dedicated to this extension and rotate it immediately if it is exposed. Hosted-service device credentials are individually revocable and do not expose an upstream provider key.
+Focus JEV stores the selected provider credential in the browser profile, not in this repository or a system keychain. Use a narrowly scoped key dedicated to this extension and rotate it immediately if it is exposed. Hosted-service device credentials are individually revocable and do not expose an upstream provider key.

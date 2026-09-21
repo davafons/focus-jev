@@ -1,15 +1,12 @@
-# JEV Focus infrastructure plan
+# Focus JEV infrastructure plan
 
-This document describes the recommended hosted architecture for the Focus Guard
+This document describes the recommended hosted architecture for the Focus JEV
 extension, with JEV access brokered by our own Cloudflare service.
 
 ## Naming
 
-The repository is now `focus-jev`. Keep **Focus Guard** as the extension name
-for the first public release: it describes the user benefit, while JEV is the
-decision engine. Candidate future product names are **JEV Focus** and
-**Offtrack**; do not rename the store listing until a name and domain are
-settled.
+The repository and extension are named **Focus JEV**. JEV is the decision
+engine; Focus JEV is the user-facing product name.
 
 ## Security boundary
 
@@ -80,7 +77,7 @@ does not provide that property.
 ## Recommended first production shape
 
 ```text
-Focus Guard extension
+Focus JEV extension
         |
         | HTTPS, signed request, short-lived device token
         v

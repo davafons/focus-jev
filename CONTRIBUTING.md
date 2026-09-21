@@ -1,6 +1,6 @@
 # Contributing
 
-Focus Guard intentionally stays small: one focus statement, one JEV decision, and one block screen. Changes should preserve that single-purpose experience.
+Focus JEV intentionally stays small: one focus statement, one JEV decision, and one block screen. Changes should preserve that single-purpose experience.
 
 ## Development
 

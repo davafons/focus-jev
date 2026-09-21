@@ -2,7 +2,7 @@
 
 ## Name
 
-Focus Guard
+Focus JEV
 
 ## Short description
 
@@ -10,12 +10,12 @@ Stay aligned with one focus goal while browsing, using fast page decisions from 
 
 ## Single purpose
 
-Focus Guard compares the active page's public metadata with a user-written focus statement and blocks pages that are confidently unrelated.
+Focus JEV compares the active page's public metadata with a user-written focus statement and blocks pages that are confidently unrelated.
 
 ## Permission justifications
 
 - `storage`: stores JEV connection settings and the active focus locally, and keeps decision caches for the browser session.
-- `http://*/*` and `https://*/*`: runs the page guard and reads the active page URL, title, and limited public metadata on pages the user visits. The extension needs broad coverage because focus enforcement applies across browsing destinations. HTTPS access sends the focus statement and active-page metadata to the provider selected by the user for a JEV decision; hosted mode sends it first to the Focus Guard gateway.
+- `http://*/*` and `https://*/*`: runs the page guard and reads the active page URL, title, and limited public metadata on pages the user visits. The extension needs broad coverage because focus enforcement applies across browsing destinations. HTTPS access sends the focus statement and active-page metadata to the provider selected by the user for a JEV decision; hosted mode sends it first to the Focus JEV gateway.
 
 ## Remote code
 

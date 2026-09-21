@@ -61,7 +61,7 @@ function render(value) {
   badge.className = `badge ${checking ? "checking" : action}`;
   badge.textContent = decision
     ? (decision.action === "block" ? "Blocked" : "Allowed")
-    : (internalPage ? "Focus Guard" : (focus.active ? "Checking" : "Not checked"));
+    : (internalPage ? "Focus JEV" : (focus.active ? "Checking" : "Not checked"));
   $("decision-reason").textContent = decision?.reason
     || (internalPage ? "Focus JEV pages are not evaluated." : (focus.active ? "Collecting page context…" : "Start a focus session to evaluate pages."));
   $("decision-meta").classList.toggle("hidden", !decision);
