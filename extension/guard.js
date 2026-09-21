@@ -1,6 +1,8 @@
 (() => {
   const ALLOW_RECHECK_MS = 60_000;
   const ERROR_RETRY_MS = 10_000;
+  const MAX_CONTEXT_CHARS = 3_000;
+  const MAX_CONTEXT_FIELD_CHARS = 900;
   let checking = false;
   let blocked = false;
   let pendingForce = false;
@@ -31,7 +33,7 @@
       const text = String(value || "").replace(/\s+/g, " ").trim();
       if (!text || seen.has(text.toLowerCase())) return;
       seen.add(text.toLowerCase());
-      details.push(`${label}: ${text.slice(0, 1_200)}`);
+      details.push(`${label}: ${text.slice(0, MAX_CONTEXT_FIELD_CHARS)}`);
     };
     const addPerson = (label, value) => {
       const people = Array.isArray(value) ? value : [value];
@@ -60,20 +62,22 @@
     add("Page heading", document.querySelector("main h1, article h1, h1")?.textContent);
     add("Open Graph title", document.querySelector('meta[property="og:title"]')?.content);
     add("Open Graph description", document.querySelector('meta[property="og:description"]')?.content);
+    add("Open Graph type", document.querySelector('meta[property="og:type"]')?.content);
+    add("Social title", document.querySelector('meta[name="twitter:title"]')?.content);
     add("Page description", document.querySelector('meta[name="description"]')?.content);
     add("Social description", document.querySelector('meta[name="twitter:description"]')?.content);
     add("Site", document.querySelector('meta[property="og:site_name"]')?.content);
-    add("Author or channel", document.querySelector(
-      '#owner #channel-name, ytd-channel-name, [itemprop="author"], [itemprop="creator"], meta[itemprop="author"]',
+    add("Author or publisher", document.querySelector(
+      'meta[name="author"], meta[property="article:author"], meta[itemprop="author"]',
     )?.content || document.querySelector(
-      '#owner #channel-name, ytd-channel-name, [itemprop="author"], [itemprop="creator"]',
+      '[rel="author"], [itemprop="author"], [itemprop="creator"], [itemprop="publisher"]',
     )?.textContent);
-    add("Video description", document.querySelector(
-      '#description-inline-expander, ytd-text-inline-expander, [itemprop="description"]',
-    )?.textContent || document.querySelector('meta[itemprop="description"]')?.content);
-    const content = document.querySelector("main, article")?.innerText;
+    add("Content summary", document.querySelector('meta[itemprop="description"]')?.content
+      || document.querySelector('[itemprop="description"]')?.textContent);
+    const content = document.querySelector('main, article, [role="main"], [itemprop="articleBody"]')?.innerText
+      || document.body?.innerText;
     if (content) add("Visible page text", content.slice(0, 1_500));
-    return details.join("\n").slice(0, 3_000);
+    return details.join("\n").slice(0, MAX_CONTEXT_CHARS);
   }
 
   function pageIconUrl() {
