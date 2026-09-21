@@ -58,13 +58,14 @@ function render(value) {
   $("page-url").textContent = tab?.url || "";
   $("page-icon").src = tab?.favIconUrl || "icons/icon-32.png";
   const badge = $("decision-badge");
+  const internalPage = Boolean(tab?.internal);
   const action = decision?.action || "neutral";
   badge.className = `badge ${action}`;
   badge.textContent = decision
     ? (decision.action === "block" ? "Blocked" : "Allowed")
-    : (focus.active ? "Checking" : "Not checked");
+    : (internalPage ? "Focus Guard" : (focus.active ? "Checking" : "Not checked"));
   $("decision-reason").textContent = decision?.reason
-    || (focus.active ? "Evaluating this page…" : "Start a focus session to evaluate pages.");
+    || (internalPage ? "Focus Guard pages are not evaluated." : (focus.active ? "Evaluating this page…" : "Start a focus session to evaluate pages."));
   $("decision-meta").classList.toggle("hidden", !decision);
   if (decision) {
     const score = Number(decision.confidence);

@@ -4,6 +4,10 @@ const Core = require("../extension/core.js");
 assert.equal(Core.normalizeTitle("(12)  AI News - YouTube"), "ai news - youtube");
 assert.equal(Core.pageIdentity("https://example.com/story#comments"), "https://example.com/story");
 assert.equal(
+  Core.pageIdentity("https://example.com/story?utm_source=newsletter&ref=home#comments"),
+  "https://example.com/story?ref=home",
+);
+assert.equal(
   Core.pageIdentity("https://www.youtube.com/watch?v=abc&t=93s&feature=share"),
   "https://www.youtube.com/watch?v=abc",
 );

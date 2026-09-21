@@ -20,6 +20,11 @@ function tabDecisionKey(tabId) {
   return `${TAB_PREFIX}${tabId}`;
 }
 
+function isInternalPage(url) {
+  if (typeof chrome.runtime.getURL !== "function") return false;
+  return String(url || "").startsWith(chrome.runtime.getURL(""));
+}
+
 async function localState() {
   const stored = await chrome.storage.local.get([STATE_KEY, SETTINGS_KEY]);
   return {
@@ -349,8 +354,9 @@ async function diagnostics() {
     sessionValues(),
   ]);
   const tab = tabs[0] || null;
+  const internal = isInternalPage(tab?.url);
   let decision = null;
-  if (typeof tab?.id === "number") {
+  if (!internal && typeof tab?.id === "number") {
     const stored = await chrome.storage.session.get(tabDecisionKey(tab.id));
     decision = stored[tabDecisionKey(tab.id)] || null;
     if (decision && !decisionMatchesTab(decision, tab)) decision = null;
@@ -364,6 +370,7 @@ async function diagnostics() {
       url: tab.url || "",
       title: tab.title || "",
       favIconUrl: tab.favIconUrl || "",
+      internal,
     } : null,
     decision,
     stats: session.stats,

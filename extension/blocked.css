@@ -11,7 +11,7 @@
 body { display: grid; min-height: 100vh; margin: 0; place-items: center; padding: 28px; background: radial-gradient(circle at 50% -20%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 48%), var(--bg); }
 main { width: min(620px, 100%); }
 .blocked-label { display: flex; align-items: center; gap: 9px; color: var(--secondary); font-size: 13px; font-weight: 650; }
-.blocked-label svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.65; stroke-linejoin: round; }
+.blocked-label img { width: 24px; height: 24px; border-radius: 6px; }
 h1 { margin: 18px 0 0; font-size: clamp(31px, 5vw, 48px); line-height: 1.08; letter-spacing: -.04em; overflow-wrap: anywhere; }
 section { margin-top: 32px; padding-top: 22px; border-top: 1px solid var(--separator); }
 section > span { color: var(--secondary); font-size: 12px; font-weight: 650; }
