@@ -25,6 +25,11 @@ function isInternalPage(url) {
   return String(url || "").startsWith(chrome.runtime.getURL(""));
 }
 
+function isBlockedPage(url) {
+  if (typeof chrome.runtime.getURL !== "function") return false;
+  return String(url || "").startsWith(chrome.runtime.getURL("blocked.html"));
+}
+
 async function localState() {
   const stored = await chrome.storage.local.get([STATE_KEY, SETTINGS_KEY]);
   return {
@@ -359,22 +364,29 @@ async function diagnostics(tabId) {
     sessionValues(),
   ]);
   const internal = isInternalPage(tab?.url);
+  const blockedPage = isBlockedPage(tab?.url);
   let decision = null;
-  if (!internal && typeof tab?.id === "number") {
+  if (typeof tab?.id === "number") {
     const stored = await chrome.storage.session.get(tabDecisionKey(tab.id));
     decision = stored[tabDecisionKey(tab.id)] || null;
-    if (decision && !decisionMatchesTab(decision, tab)) decision = null;
+    if (!blockedPage && (internal || !decisionMatchesTab(decision, tab))) decision = null;
   }
+  const displayTab = blockedPage && decision ? {
+    ...tab,
+    url: decision.url,
+    title: decision.title,
+    favIconUrl: decision.favIconUrl || tab.favIconUrl,
+  } : tab;
   return {
     focus,
     configured: Core.settingsComplete(settings),
     provider: Core.providerMode(settings),
-    tab: tab ? {
-      id: tab.id,
-      url: tab.url || "",
-      title: tab.title || "",
-      favIconUrl: tab.favIconUrl || "",
-      internal,
+    tab: displayTab ? {
+      id: displayTab.id,
+      url: displayTab.url || "",
+      title: displayTab.title || "",
+      favIconUrl: displayTab.favIconUrl || "",
+      internal: blockedPage && decision ? false : internal,
     } : null,
     decision,
     stats: session.stats,

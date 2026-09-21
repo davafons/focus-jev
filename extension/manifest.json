@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Focus Guard",
+  "name": "Focus JEV",
   "version": "1.4.1",
   "description": "Stay on task by asking JEV whether each page supports your current focus.",
   "permissions": ["storage", "tabs", "scripting"],
@@ -18,7 +18,7 @@
     "128": "icons/icon-128.png"
   },
   "action": {
-    "default_title": "Focus Guard",
+    "default_title": "Focus JEV",
     "default_icon": {
       "16": "icons/icon-16.png",
       "32": "icons/icon-32.png"

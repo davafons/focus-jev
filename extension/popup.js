@@ -11,7 +11,7 @@ function send(message) {
       if (chrome.runtime.lastError) {
         resolve({ ok: false, error: chrome.runtime.lastError.message });
       } else {
-        resolve(response || { ok: false, error: "No response from Focus Guard." });
+        resolve(response || { ok: false, error: "No response from Focus JEV." });
       }
     });
   });
@@ -60,8 +60,9 @@ function render(value) {
   $("page-icon").src = tab?.favIconUrl || "icons/icon-32.png";
   const badge = $("decision-badge");
   const internalPage = Boolean(tab?.internal);
+  const checking = focus.active && !decision && !internalPage;
   const action = decision?.action || "neutral";
-  badge.className = `badge ${action}`;
+  badge.className = `badge ${checking ? "checking" : action}`;
   badge.textContent = decision
     ? (decision.action === "block" ? "Blocked" : "Allowed")
     : (internalPage ? "Focus Guard" : (focus.active ? "Checking" : "Not checked"));
@@ -97,7 +98,7 @@ async function refresh() {
   const response = await send({ type: "focus-guard-diagnostics", tabId: tab?.id });
   if (version !== refreshVersion) return;
   if (!response.ok) {
-    showMessage(response.error || "Focus Guard could not load.", true);
+    showMessage(response.error || "Focus JEV could not load.", true);
     return;
   }
   showMessage("");

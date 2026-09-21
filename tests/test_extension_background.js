@@ -36,6 +36,7 @@ global.chrome = {
     onInstalled: { addListener: () => {} },
     openOptionsPage: async () => {},
     getManifest: () => ({ version: "1.4.0" }),
+    getURL: (path) => `chrome-extension://focus-guard/${path}`,
   },
 };
 
@@ -96,6 +97,14 @@ function send(message, sender = {}) {
   const details = await send({ type: "focus-guard-blocked-details" }, sender);
   assert.equal(details.decision.action, "block");
   assert.equal(details.focus.active, true);
+  activeTab.url = "chrome-extension://focus-guard/blocked.html";
+  activeTab.title = "Page blocked · Focus JEV";
+  const blockedDiagnostics = await send({ type: "focus-guard-diagnostics" });
+  assert.equal(blockedDiagnostics.diagnostics.tab.title, "A game");
+  assert.equal(blockedDiagnostics.diagnostics.tab.url, "https://example.com/game");
+  assert.equal(blockedDiagnostics.diagnostics.decision.action, "block");
+  activeTab.url = "https://example.com/game";
+  activeTab.title = "A game";
   assert.equal(lastFetch.url, "https://api.cloudflare.com/client/v4/accounts/account/ai/run");
   assert.equal(lastFetch.options.headers.Authorization, "Bearer token");
   assert.equal(lastFetch.options.headers["cf-aig-gateway-id"], "jev-local");

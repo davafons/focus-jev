@@ -43,7 +43,7 @@ function message(text, error = false) {
 }
 
 async function load() {
-  $("version").textContent = `Focus Guard ${chrome.runtime.getManifest().version}`;
+  $("version").textContent = `Focus JEV ${chrome.runtime.getManifest().version}`;
   const response = await send({ type: "focus-guard-get-settings" });
   if (!response?.ok) return message(response?.error || "Could not load settings.", true);
   const settings = response.settings || {};

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Focus Guard Settings</title>
+    <title>Focus JEV Settings</title>
     <link rel="stylesheet" href="options.css">
   </head>
   <body>
@@ -12,7 +12,7 @@
         <div class="mark" aria-hidden="true">
           <svg viewBox="0 0 24 24"><path d="M12 3.2 19 6v5.2c0 4.4-2.8 7.8-7 9.6-4.2-1.8-7-5.2-7-9.6V6l7-2.8Z"/></svg>
         </div>
-        <div><h1>Settings</h1><p id="version">Focus Guard</p></div>
+        <div><h1>Settings</h1><p id="version">Focus JEV</p></div>
       </header>
 
       <section>
@@ -21,7 +21,7 @@
 
         <label for="provider">Provider</label>
         <select id="provider">
-          <option value="hosted">Focus Guard hosted service</option>
+          <option value="hosted">Focus JEV hosted service</option>
           <option value="cloudflare">Cloudflare AI (your account)</option>
           <option value="typesafe">TypeSafe JEV (your API key)</option>
           <option value="compatible">Compatible System One endpoint</option>
@@ -76,7 +76,7 @@
 
       <section class="privacy">
         <h2>Data and privacy</h2>
-        <p>Bring-your-own-key modes send your focus statement and limited public page metadata directly to the provider you choose. Hosted mode sends the same limited decision input to the Focus Guard service before it calls JEV.</p>
+        <p>Bring-your-own-key modes send your focus statement and limited public page metadata directly to the provider you choose. Hosted mode sends the same limited decision input to the Focus JEV service before it calls JEV.</p>
         <p>Credentials and session state stay in this browser profile. Use narrowly scoped keys: browser extension storage is profile-local, not a system keychain.</p>
       </section>
     </main>
