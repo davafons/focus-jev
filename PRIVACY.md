@@ -19,7 +19,19 @@ In bring-your-own-key mode, the focus statement and active-page metadata are sen
 
 In hosted-service mode, the same limited decision input is sent to the Focus JEV gateway, which validates a revocable device credential, applies quota and abuse controls, and forwards a fixed JEV request to its configured provider. The production Worker has invocation logging disabled and does not retain focus statements, URLs, titles, descriptions, request bodies, or provider keys in its application logs. It can technically process the plaintext request in transit; hosted mode is therefore not equivalent to the direct/BYOK privacy path.
 
-Your selected provider may retain request logs according to its settings and policies. Review those settings before use. The hosted service's retention and operational logging policy will be published at a stable LOST COORDS URL before public release.
+Your selected provider may retain request logs according to its settings and policies. Review those settings before use.
+
+## Hosted service retention and operational logging
+
+The hosted service processes the focus statement and bounded page input only to obtain a JEV decision. It does not write page URLs, titles, descriptions, focus statements, or model answers to its D1 database. Worker observability is disabled. If the upstream provider is unavailable, the Worker emits a small error event containing only the provider name and a truncated error code; it does not include page or focus content.
+
+The service retains the following operational records:
+
+- an installation identifier, a one-way hash of its device secret, plan, limit, and timestamps while the installation remains active;
+- monthly per-installation and aggregate decision counts for quota and abuse controls; and
+- one-way request-nonce hashes for up to ten minutes to prevent replay attacks.
+
+The extension cannot delete a hosted installation server-side yet. Uninstalling removes its local credential; do not use hosted mode if you require immediate server-side deletion. This policy is the public retention policy for the hosted service and is available at `https://github.com/davafons/focus-jev/blob/main/PRIVACY.md`.
 
 ## Local storage
 
