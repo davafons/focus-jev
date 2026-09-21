@@ -29,6 +29,16 @@
       <section id="start-view">
         <label class="prompt" for="goal">What are you focusing on?</label>
         <textarea id="goal" rows="8" maxlength="8000" placeholder="For example: Learn how JEV makes decisions. Documentation, technical articles, and relevant videos are useful. Avoid unrelated feeds and entertainment."></textarea>
+        <fieldset class="allowances">
+          <legend>Allowed while focusing</legend>
+          <label class="allowance-toggle" for="allow-music">
+            <input id="allow-music" type="checkbox">
+            <span>
+              <strong>Allow music</strong>
+              <small>Music and music videos stay available without adding it to your goal.</small>
+            </span>
+          </label>
+        </fieldset>
         <p id="setup-note" class="note hidden">Connect JEV in Settings before starting.</p>
         <p class="disclosure">By starting, you agree to send this focus and each active page’s URL, title, and public metadata to your selected provider for a decision. Hosted mode sends it through the Focus Guard gateway.</p>
         <button id="start" class="primary" type="button">
@@ -38,6 +48,7 @@
 
       <section id="active-view" class="hidden">
         <p id="active-goal" class="active-goal"></p>
+        <p id="active-allowances" class="active-allowances"></p>
       </section>
 
       <section id="page-section" class="page-section">

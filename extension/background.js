@@ -18,7 +18,7 @@ function tabDecisionKey(tabId) {
 async function localState() {
   const stored = await chrome.storage.local.get([STATE_KEY, SETTINGS_KEY]);
   return {
-    focus: stored[STATE_KEY] || { active: false, goal: "", sessionId: "" },
+    focus: stored[STATE_KEY] || { active: false, goal: "", allowances: { music: false }, sessionId: "" },
     settings: stored[SETTINGS_KEY] || {},
   };
 }
@@ -240,7 +240,8 @@ async function fetchJev(settings, request, timeoutMs = 10_000) {
 }
 
 async function evaluatePage(focus, settings, page) {
-  const key = Core.cacheKey(focus.sessionId, focus.goal, page);
+  const focusStatement = Core.focusStatement(focus.goal, focus.allowances);
+  const key = Core.cacheKey(focus.sessionId, focusStatement, page);
   const { cache } = await sessionValues();
   if (Core.cacheEntryValid(cache[key])) {
     await updateStats("cacheHits");
@@ -251,7 +252,7 @@ async function evaluatePage(focus, settings, page) {
   const work = (async () => {
     await updateStats("jevCalls");
     try {
-      const response = await fetchJev(settings, Core.jevRequest(focus.goal, page));
+      const response = await fetchJev(settings, Core.jevRequest(focus.goal, page, focus.allowances));
       const decision = {
         ...Core.decisionFromAnswers(Core.extractAnswers(response), {
           blockThreshold: Core.blockThresholdForPage(page),
@@ -371,12 +372,18 @@ async function notifyTabs(type, extra = {}) {
   )));
 }
 
-async function startFocus(goal) {
+async function startFocus(goal, allowances) {
   const cleaned = String(goal || "").trim().slice(0, 8_000);
   if (!cleaned) throw new Error("Write what you want to focus on first.");
   const { settings } = await localState();
   if (!Core.settingsComplete(settings)) throw new Error("Configure a JEV provider in Settings first.");
-  const focus = { active: true, goal: cleaned, sessionId: crypto.randomUUID(), startedAt: Date.now() };
+  const focus = {
+    active: true,
+    goal: cleaned,
+    allowances: Core.normalizeAllowances(allowances),
+    sessionId: crypto.randomUUID(),
+    startedAt: Date.now(),
+  };
   await chrome.storage.local.set({ [STATE_KEY]: focus });
   await clearSessionDecisions();
   await notifyTabs("focus-guard-check-now", { force: true });
@@ -420,7 +427,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       task = blockedDetails(sender).then((value) => ({ ok: true, ...value }));
       break;
     case "focus-guard-start":
-      task = startFocus(message.goal).then((focus) => ({ ok: true, focus }));
+      task = startFocus(message.goal, message.allowances).then((focus) => ({ ok: true, focus }));
       break;
     case "focus-guard-stop":
       task = stopFocus().then((focus) => ({ ok: true, focus }));
@@ -430,7 +437,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (!tab?.id) return { ok: false };
         const [{ focus }, { cache }] = await Promise.all([localState(), sessionValues()]);
         if (focus.active) {
-          delete cache[Core.cacheKey(focus.sessionId, focus.goal, tab)];
+          delete cache[Core.cacheKey(focus.sessionId, Core.focusStatement(focus.goal, focus.allowances), tab)];
           await chrome.storage.session.set({ [CACHE_KEY]: cache });
         }
         await chrome.storage.session.remove(tabDecisionKey(tab.id));

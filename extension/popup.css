@@ -63,6 +63,14 @@ textarea {
 }
 textarea::placeholder { color: var(--tertiary); }
 textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+.allowances { margin: 14px 0 0; padding: 0; border: 0; }
+.allowances legend { margin-bottom: 8px; color: var(--secondary); font-size: 11px; font-weight: 720; letter-spacing: .07em; text-transform: uppercase; }
+.allowance-toggle { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1px solid var(--separator); border-radius: 12px; cursor: pointer; }
+.allowance-toggle:hover { background: var(--control); }
+.allowance-toggle input { width: 16px; height: 16px; margin: 2px 0 0; accent-color: var(--accent); }
+.allowance-toggle span { display: grid; gap: 2px; }
+.allowance-toggle strong { font-size: 13px; font-weight: 680; }
+.allowance-toggle small { color: var(--secondary); font-size: 11px; line-height: 1.35; }
 button { border: 0; font: inherit; cursor: pointer; }
 button:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 34%, transparent); outline-offset: 2px; }
 .primary {
@@ -82,6 +90,7 @@ button:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 34%, 
   margin: 0; max-height: 152px; overflow: auto; white-space: pre-wrap;
   font-size: 17px; font-weight: 570; line-height: 1.5; letter-spacing: -.012em;
 }
+.active-allowances { margin: 8px 0 0; color: var(--secondary); font-size: 12px; font-weight: 620; }
 .page-section { margin-top: 28px; padding-top: 25px; border-top: 1px solid var(--separator); }
 .page-row { align-items: flex-start; }
 .page-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 20px; font-weight: 720; letter-spacing: -.025em; }

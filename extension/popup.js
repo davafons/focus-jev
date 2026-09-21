@@ -2,6 +2,7 @@ const $ = (id) => document.getElementById(id);
 let diagnostics = null;
 let requestedCheckFor = "";
 let usageLoadedFor = "";
+let draftInitialized = false;
 
 function send(message) {
   return new Promise((resolve) => {
@@ -39,8 +40,13 @@ function render(value) {
   $("status-line").classList.toggle("hidden", !focus.active);
   $("ready-caption").classList.toggle("hidden", focus.active);
   $("stop").classList.toggle("hidden", !focus.active);
-  if (!focus.active && !$("goal").value) $("goal").value = focus.goal || "";
+  if (!focus.active && !draftInitialized) {
+    $("goal").value = focus.goal || "";
+    $("allow-music").checked = Boolean(focus.allowances?.music);
+    draftInitialized = true;
+  }
   $("active-goal").textContent = focus.goal || "";
+  $("active-allowances").textContent = focus.allowances?.music ? "Music allowed" : "";
 
   $("page-title").textContent = tab?.title || "No page selected";
   const badge = $("decision-badge");
@@ -107,7 +113,11 @@ async function refresh() {
 $("start").addEventListener("click", async () => {
   $("start").disabled = true;
   showMessage("Starting…");
-  const response = await send({ type: "focus-guard-start", goal: $("goal").value });
+  const response = await send({
+    type: "focus-guard-start",
+    goal: $("goal").value,
+    allowances: { music: $("allow-music").checked },
+  });
   if (!response.ok) {
     await refresh();
     showMessage(response.error || "Could not start focus.", true);

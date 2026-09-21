@@ -22,6 +22,7 @@ assert.doesNotMatch(popup, />Current focus</i);
 assert.doesNotMatch(popup, />Current page</i);
 assert.doesNotMatch(popup, /<h1[^>]*>Focus Guard/i);
 assert.match(popup, /<textarea[^>]+maxlength="8000"/);
+assert.match(popup, /id="allow-music"/);
 assert.match(popup, /By starting, you agree to send this focus/);
 assert.match(popup, /selected provider/);
 

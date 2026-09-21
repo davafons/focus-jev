@@ -62,6 +62,8 @@ assert.equal(Core.pageType("https://x.com/home"), "Open-ended social-media timel
 assert.equal(Core.isAttentionFeed("https://x.com/home"), true);
 assert.equal(Core.blockThresholdForPage({ url: "https://x.com/home" }), 0.5);
 assert.equal(Core.blockThresholdForPage({ url: "https://x.com/example/status/123" }), 0.65);
+assert.equal(Core.focusStatement("Write a report", { music: false }), "Write a report");
+assert.match(Core.focusStatement("Write a report", { music: true }), /Music and music-video destinations/);
 
 const request = Core.jevRequest("Learn more about JEV AI", {
   url: "https://www.youtube.com/watch?v=IHH4EQVenfo",
@@ -73,5 +75,6 @@ assert.equal(request.questions.should_block.type, "noul");
 assert.equal(request.state.focus_statement, "Learn more about JEV AI");
 assert.equal(request.state.page.context, "Travel and entertainment");
 assert.equal(request.state.page.type, "Individual video page");
+assert.match(Core.jevRequest("Write", { url: "https://music.example" }, { music: true }).state.focus_statement, /Explicit allowance/);
 
 console.log("core policy tests passed");

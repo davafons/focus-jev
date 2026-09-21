@@ -70,7 +70,9 @@ function send(message, sender = {}) {
 (async () => {
   const settings = { accountId: "account", apiToken: "token", gatewayId: "jev-local" };
   assert.equal((await send({ type: "focus-guard-save-settings", settings })).ok, true);
-  assert.equal((await send({ type: "focus-guard-start", goal: "Research current AI news" })).ok, true);
+  const started = await send({ type: "focus-guard-start", goal: "Research current AI news", allowances: { music: true } });
+  assert.equal(started.ok, true);
+  assert.equal(started.focus.allowances.music, true);
 
   const sender = { tab: activeTab };
   activeTab.url = "https://www.youtube.com/results?search_query=ai";
@@ -99,6 +101,7 @@ function send(message, sender = {}) {
   assert.equal(lastFetch.options.headers["cf-aig-gateway-id"], "jev-local");
   assert.equal(JSON.parse(lastFetch.options.body).model, "typesafe/jev");
   assert.equal(JSON.parse(lastFetch.options.body).input.questions.should_block.type, "noul");
+  assert.match(JSON.parse(lastFetch.options.body).input.state.focus_statement, /Explicit allowance/);
 
   const cached = await send({
     type: "focus-guard-decide",

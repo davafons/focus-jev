@@ -4,7 +4,7 @@
   const BLOCK_THRESHOLD = 0.65;
   const ATTENTION_FEED_THRESHOLD = 0.5;
   const ALLOW_CACHE_MS = 60_000;
-  const DECISION_POLICY_VERSION = 3;
+  const DECISION_POLICY_VERSION = 4;
   const MODEL = "typesafe/jev";
   const TYPESAFE_SYSTEMONE_URL = "https://api.typesafe.ai/v1/systemone";
   const HOSTED_API_URL = "https://api.focus-jev.lostcoords.com";
@@ -46,6 +46,17 @@
       url: pageIdentity(page?.url),
       title: normalizeTitle(page?.title),
     });
+  }
+
+  function normalizeAllowances(value) {
+    return { music: Boolean(value?.music) };
+  }
+
+  function focusStatement(goal, allowances) {
+    const base = String(goal || "").trim().slice(0, 7_200);
+    const allowed = normalizeAllowances(allowances);
+    if (!allowed.music) return base;
+    return `${base}\n\nExplicit allowance: Music and music-video destinations used for listening are permitted during this focus session. This does not permit unrelated browsing, feeds, or entertainment.`;
   }
 
   function providerMode(settings) {
@@ -139,10 +150,10 @@
     }
   }
 
-  function jevRequest(goal, page) {
+  function jevRequest(goal, page, allowances) {
     return {
       state: {
-        focus_statement: String(goal || "").trim().slice(0, 8_000),
+        focus_statement: focusStatement(goal, allowances),
         page: {
           url: pageIdentity(page?.url).slice(0, 2_000),
           title: String(page?.title || "").slice(0, 500),
@@ -220,10 +231,12 @@
     cacheKey,
     decisionFromAnswers,
     extractAnswers,
+    focusStatement,
     isGatewayPage,
     isAttentionFeed,
     jevRequest,
     normalizeTitle,
+    normalizeAllowances,
     pageType,
     pageIdentity,
     providerMode,
